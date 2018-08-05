@@ -4,18 +4,33 @@
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>
   </welcome-file-list>
+
   <display-name>ct-back</display-name>
  	<servlet>
-	    <servlet-name>jersey-sevlet</servlet-name>
+	    <servlet-name>test-sevlet</servlet-name>
 	    <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
     	<init-param>
         	<param-name>jersey.config.server.provider.packages</param-name>
-        	<param-value>com.pe.azoth</param-value>
+        	<param-value>com.pe.azoth.test</param-value>
     	</init-param>
     	<load-on-startup>1</load-on-startup>
   	</servlet>
-  	<servlet-mapping>
-	    <servlet-name>jersey-sevlet</servlet-name>
-	    <url-pattern>/rest/*</url-pattern>
-  	</servlet-mapping>
+  <servlet-mapping>
+	  <servlet-name>test-sevlet</servlet-name>
+	  <url-pattern>/test/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>ct-servlet</servlet-name>
+    <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+    <init-param>
+        <param-name>jersey.config.server.provider.packages</param-name>
+        <param-value>com.pe.azoth.controlador</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ct-servlet</servlet-name>
+    <url-pattern>/api/*</url-pattern>
+  </servlet-mapping>
 </web-app>
