@@ -33,13 +33,14 @@ public class JWTManager{
 	
 	public String createJWT(String user, String pass , Map<String,Object> extraClaims)  {
 		
-		if(user.equals("admin") && pass.equals("admin")) {
+		if(user.trim().equals("admin") && pass.trim().equals("admin")) {
 			JwtBuilder builder = Jwts.builder();
 			//SETTING THE HEADERS
 			builder.setHeaderParam("typ","JWT");
 			//SETTING THE CLAIMS
-			builder.claim("user", user);
-			builder.claim("password", pass);
+			builder.claim("id",   user);
+			builder.claim("pass", pass);
+			
 			
 			if(extraClaims != null)
 				builder.addClaims(extraClaims);

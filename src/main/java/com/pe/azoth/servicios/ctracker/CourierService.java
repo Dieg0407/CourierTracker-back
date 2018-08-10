@@ -1,9 +1,14 @@
 package com.pe.azoth.servicios.ctracker;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
+
+import com.pe.azoth.modelo.JWTManager;
 
 @Path("/")
 public class CourierService {
@@ -14,18 +19,37 @@ public class CourierService {
 		return "Hello Jersey";
 	}
 	
-	@GET
-	@Path("/json")
-	@Produces(MediaType.APPLICATION_JSON)
-	public String retrunJson() {
-		return "{ "+
-					"\"state\":\"success\", "+
-					"\"usuario\": {"+
-						"\"id_user\": \"Dieg0407\", "+
-						"\"email\":\"dieg0407@hotmail.com\","+
-						"\"nombres\":\"Diego Alejandro\","+
-						"\"photo\":\"data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNi4wLjQsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+DQo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB3aWR0aD0iMTYwcHgiIGhlaWdodD0iMTYwcHgiIHZpZXdCb3g9Ii0zMCAtMzAgMTYwIDE2MCIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAtMzAgLTMwIDE2MCAxNjAiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPGNpcmNsZSBmaWxsPSIjMjMxRjIwIiBzdHJva2U9IiM3N0JDMUYiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBjeD0iNDkuNjM0IiBjeT0iNTAuMDI2IiByPSI3NS4wMDEiLz4NCjxnPg0KCTxwYXRoIGZpbGw9IiNGRkZGRkYiIGQ9Ik00OC44MDksNTYuNDE4bC01NS44Mi0yMi42NzRsNTUuODItMTkuMzkxbDU0LjExOSwxOS4zOTFMNDguODA5LDU2LjQxOHogTTIuNjAyLDMzLjk4OUw0OC43ODksNTIuNzUNCgkJbDQ0Ljc4NC0xOC43NjFMNDguNzkxLDE3Ljk0NUwyLjYwMiwzMy45ODl6Ii8+DQoJPHBvbHlnb24gZmlsbD0iI0ZGRkZGRiIgcG9pbnRzPSI3Mi43MzgsNTguMTE4IDY5LjM1Miw1OC4xMTggNjkuMzUyLDQ2LjMyOSA0Ni41OTksMzUuMzk0IDQ4LjA2OCwzMi4zNDEgNzIuNzM4LDQ0LjE5NyAJIi8+DQoJPGVsbGlwc2UgZmlsbD0iI0ZGRkZGRiIgY3g9IjQ3LjUwNSIgY3k9IjMzLjU4NSIgcng9IjMuNzg0IiByeT0iMS43ODEiLz4NCgk8cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNNDguMDI0LDczLjQwMmMtMTEuMDQsMC0yMy4yODMtNy44NTItMjMuNzk5LTguMTg2bC0wLjc3NC0wLjQ5OFY0NS45OTRoMy4zODlWNjIuODUNCgkJYzIuNzkzLDEuNjY5LDEyLjYzNiw3LjE2MywyMS4xODUsNy4xNjNjOC41NTMsMCwxOC41MDMtNS40OTksMjEuMzMtNy4xN1Y0NS45OTRoMy4zODh2MTguNzNsLTAuNzgyLDAuNTAyDQoJCUM3MS40MzgsNjUuNTU5LDU5LjA1OSw3My40MDIsNDguMDI0LDczLjQwMnoiLz4NCgk8Y2lyY2xlIGZpbGw9IiNGRkZGRkYiIGN4PSI3MS4wNDQiIGN5PSI1OC4xMTkiIHI9IjIuMjM3Ii8+DQoJPHBhdGggZmlsbD0iI0ZGRkZGRiIgZD0iTTcxLjA0NCw1OC44NDhjMCwwLTMuNDU0LTAuMDA5LTMuNDU0LDIuODgzYzAsMi44OTQsMCwyNS4yOTQsMCwyNS4yOTRsMS4yNDMtMS43MDhsMS4xMTksMS44NDkNCgkJbDEuMjY5LTIuMTQ5bDEuMTQyLDIuMTc0bDAuOTg4LTIuNDI5bDEuMzMyLDIuMjc4VjYxLjczQzc0LjY4Myw2MS43Myw3NC41OTIsNTguODQ4LDcxLjA0NCw1OC44NDhMNzEuMDQ0LDU4Ljg0OHoiLz4NCjwvZz4NCjwvc3ZnPg0K\"" +
-					"} }";
+	//OBTENER LOS REGISTROS
+	@POST
+	@Path("/getTable")
+	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	public String getTable(
+		@FormParam("token") @DefaultValue("") String jwt){
+		JWTManager jwtManager = new JWTManager();
+
+		if(jwtManager.parseJWT(jwt)){
+			
+			//SE EXTRAEN LOS PEDIDOS DE ESTE MEN
+			return "{"+
+				"\"state\":\"success\","+
+				"\"pedidos\":["+
+					"{\"id\":1 , \"desc\":\"pedido1\"},"+
+					"{\"id\":2 , \"desc\":\"pedido2\"},"+
+					"{\"id\":3 , \"desc\":\"pedido3\"},"+
+					"{\"id\":4 , \"desc\":\"pedido4\"},"+
+					"{\"id\":5 , \"desc\":\"pedido5\"},"+
+					"{\"id\":6 , \"desc\":\"pedido6\"}"+
+				"]"+
+			"}";
+		}
+		else{
+			return "{"+
+				"\"state\":\"error\","+
+				"\"message\":\"Credenciales inválidas\","+
+				"\"token\":\""+jwt+"\""+
+			"}";
+		}
+
 	}
 
 }
