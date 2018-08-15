@@ -1,0 +1,15 @@
+{
+	"type-connection" : "program",
+	
+	"server-connection":{
+		"jndi":"java:/tracker"
+	},
+	"program-connection":{
+		"user":"root",
+		"pass":"1234",
+		"ip":"localhost",
+		"port":"3306",
+		"db":"courier_tracker",
+		"db-provider":"mysql"
+	}
+}

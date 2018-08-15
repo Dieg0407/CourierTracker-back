@@ -1,6 +1,6 @@
-package com.pe.azoth.servicios.ctracker;
+package com.pe.azoth.servicios.tracker;
 
-import javax.ws.rs.GET;
+
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -13,11 +13,6 @@ import com.pe.azoth.modelo.JWTManager;
 @Path("/")
 public class CourierService {
 	
-	@GET
-	@Produces(MediaType.TEXT_PLAIN)
-	public String sayPlainTextHello() {
-		return "Hello Jersey";
-	}
 	
 	//OBTENER LOS REGISTROS
 	@POST
@@ -27,7 +22,7 @@ public class CourierService {
 		@FormParam("token") @DefaultValue("") String jwt){
 		JWTManager jwtManager = new JWTManager();
 
-		if(jwtManager.parseJWT(jwt)){
+		if(jwtManager.parseJWT(jwt) != null){
 			
 			//SE EXTRAEN LOS PEDIDOS DE ESTE MEN
 			return "{"+
