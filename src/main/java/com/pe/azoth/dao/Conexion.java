@@ -14,7 +14,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.pe.azoth.beans.DataBaseInfo;
 
-class Conexion {
+public class Conexion {
 	
 	protected static DataBaseInfo config = null;
 	

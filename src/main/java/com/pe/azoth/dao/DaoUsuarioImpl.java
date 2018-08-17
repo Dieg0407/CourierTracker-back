@@ -24,24 +24,15 @@ import org.apache.commons.dbutils.handlers.ArrayListHandler;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pe.azoth.beans.Usuario;
 
-public class UsuarioDaoImpl implements UsuarioDao {
-	
-	public static void main(String[] args) throws JsonParseException, JsonMappingException, IOException, NullPointerException, SQLException, NamingException {
-		UsuarioDao dao = new UsuarioDaoImpl();
-		
-		ObjectMapper mapper = new ObjectMapper();
-		System.out.println(mapper.writeValueAsString(dao.listUsuarios()));
-		System.out.println(mapper.writeValueAsString(dao.getUsuario("admin", "administrador123456789")));
-	}
+public class DaoUsuarioImpl implements DaoUsuario {
 	
 	private Conexion conexion;
 	
 	private static String coded = "courier-tracker-15082018	";
 	
-	public UsuarioDaoImpl() throws JsonParseException, JsonMappingException, IOException {	
+	public DaoUsuarioImpl() throws JsonParseException, JsonMappingException, IOException {	
 		conexion = new Conexion();
 	}
 	
@@ -56,7 +47,7 @@ public class UsuarioDaoImpl implements UsuarioDao {
 					.stream()
 					.map(rs -> new Usuario(
 						(String) rs[0],//ID
-						this.decodePass( (String) rs[1] ,UsuarioDaoImpl.coded),//PASS
+						this.decodePass( (String) rs[1] ,DaoUsuarioImpl.coded),//PASS
 						(String) rs[2],//NOMBRES
 						(String) rs[3],//APELLIDOS
 						(String) rs[4],//DNI
@@ -74,7 +65,7 @@ public class UsuarioDaoImpl implements UsuarioDao {
 	@Override
 	public Usuario getUsuario(String id, String pass) throws SQLException, NamingException , NullPointerException{
 		try(Connection conn = conexion.getConnection()){
-			pass = this.encodePass(pass, UsuarioDaoImpl.coded);		
+			pass = this.encodePass(pass, DaoUsuarioImpl.coded);		
 			List<Usuario> res = 
 					new QueryRunner()
 					.query(conn,  
@@ -84,7 +75,7 @@ public class UsuarioDaoImpl implements UsuarioDao {
 					.stream()
 					.map(rs -> new Usuario(
 							(String) rs[0],//ID
-							this.decodePass( (String) rs[1] ,UsuarioDaoImpl.coded),//PASS
+							(String) rs[1],//PASS <- Se enviará al Token, no se decodifica
 							(String) rs[2],//NOMBRES
 							(String) rs[3],//APELLIDOS
 							(String) rs[4],//DNI
@@ -107,7 +98,7 @@ public class UsuarioDaoImpl implements UsuarioDao {
 	public void insertUsuario(Usuario usuario) throws SQLException, NamingException , NullPointerException{
 		try(Connection conn = conexion.getConnection()){
 			usuario.setPass(
-					this.encodePass(usuario.getPass(), UsuarioDaoImpl.coded)
+					this.encodePass(usuario.getPass(), DaoUsuarioImpl.coded)
 			);
 			
 			try(PreparedStatement pst = conn.prepareStatement(

@@ -7,7 +7,7 @@ import javax.naming.NamingException;
 
 import com.pe.azoth.beans.Usuario;
 
-public interface UsuarioDao {
+public interface DaoUsuario {
 
 	List<Usuario> listUsuarios() throws SQLException, NamingException, NullPointerException;
 
