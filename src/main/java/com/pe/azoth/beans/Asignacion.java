@@ -6,19 +6,21 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
 public class Asignacion {
-	public Asignacion(String usuario, int producto, boolean activo) {
+	public Asignacion(String usuario, int producto, String codProducto, Integer estado) {
 		super();
 		this.usuario = usuario;
 		this.producto = producto;
-		this.activo = activo;
+		this.estado = estado;
+		this.codProducto = codProducto;
 	}
 	
 	public Asignacion() {}
 	
 	
 	private String usuario;
+	private String codProducto;
 	private int producto;
-	private Boolean activo;
+	private Integer estado;
 	
 	@JsonProperty("id_usuario")
 	public String getUsuario() {
@@ -27,12 +29,12 @@ public class Asignacion {
 	public void setIdUsuario(String usuario) {
 		this.usuario = usuario;
 	}
-	@JsonProperty("activo")
-	public Boolean isActivo() {
-		return activo;
+	@JsonProperty("estado")
+	public Integer getEstado() {
+		return estado;
 	}
-	public void setActivo(Boolean activo) {
-		this.activo = activo;
+	public void setEstado(Integer estado) {
+		this.estado = estado;
 	}
 	@JsonProperty("id_producto")
 	public int getProducto() {
@@ -41,6 +43,14 @@ public class Asignacion {
 	public void setIdProducto(int producto) {
 		this.producto = producto;
 	}
+
+	@JsonProperty("codigo")
+	public String getCodProducto(){
+		return this.codProducto;
+	}
 	
+	public void setCodProducto(String codProducto){
+		this.codProducto = codProducto;
+	}
 	
 }

@@ -19,13 +19,13 @@ public interface DaoProducto {
 	List<Producto> listProductos() throws SQLException, NamingException;
 
 	/**
-	 * Lista los productos segun su ID
-	 * @param ids
+	 * Lista los productos segun su ID y CODIGO DE LA SIGUIENTE FORMA CODIGO-ID
+	 * @param CODIGO-ID concatenados
 	 * @return
 	 * @throws SQLException
 	 * @throws NamingException
 	 */
-	List<Producto> listProductos(Integer... ids) throws SQLException, NamingException;
+	List<Producto> listProductos(String...strings ) throws SQLException, NamingException;
 
 	/**
 	 * Obtienes un producto por su ID unico
@@ -34,7 +34,7 @@ public interface DaoProducto {
 	 * @throws SQLException
 	 * @throws NamingException
 	 */
-	Producto getProducto(Integer id) throws SQLException, NamingException;
+	Producto getProducto(Integer id, String codigo) throws SQLException, NamingException;
 
 	/**
 	 * Se obtiene un producto por el codigo de empresa
@@ -43,7 +43,7 @@ public interface DaoProducto {
 	 * @throws SQLException
 	 * @throws NamingException
 	 */
-	Producto getProducto(String codigo) throws SQLException, NamingException;
+	List<Producto> listProductos(String codigo) throws SQLException, NamingException;
 
 	int insertProducto(Producto producto, Connection connection) throws SQLException;
 
@@ -59,5 +59,22 @@ public interface DaoProducto {
 	int updateProducto(Producto producto, Connection connection) throws SQLException;
 
 	int updateProducto(Producto producto) throws SQLException, NamingException;
+
+	/**
+	 * Devuelve el proximo id correspondiente a un codigo determinado, de no existir dicho codigo devuelve 1
+	 * @param codigo
+	 * @return
+	 * @throws SQLException
+	 * @throws NamingException
+	 */
+	int getNextIdProducto(String codigo) throws SQLException, NamingException;
+	
+	/**
+	 * Retorna una Lista con todos los codigos que existen actualmente en la BD
+	 * @return
+	 * @throws A
+	 * @throws NamingException
+	 */
+	List<String> getCodigos() throws SQLException, NamingException;
 
 }

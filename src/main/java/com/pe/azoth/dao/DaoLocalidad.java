@@ -11,6 +11,6 @@ public interface DaoLocalidad {
 
 	List<Localidad> listLocalidades() throws SQLException, NamingException;
 
-	Localidad listLocalidades(int id) throws SQLException, NamingException;
+	Localidad getLocalidad(int id) throws SQLException, NamingException;
 
 }

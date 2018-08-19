@@ -78,18 +78,26 @@ public class JWTManager{
 		
 	}
 	
-	public Usuario parseJWT(String jwtString) throws JsonParseException, JsonMappingException, IOException {
+	public Usuario parseJWT(String jwtString) throws JsonParseException, JsonMappingException, IOException, SQLException, NamingException {
 		
 		JwtParser parser = Jwts.parser();
 		parser.setSigningKey(key);
 		
 		if(parser.isSigned(jwtString)) {
+			DaoUsuario dao = new DaoUsuarioImpl();
+			
 			ObjectMapper mapper = new ObjectMapper();
 			String base64 = jwtString.split("\\.")[1];
 			
 			String usrJson = new String(Base64.getDecoder().decode(base64.getBytes("utf-8")),"utf-8");
 			
-			return mapper.readValue(usrJson , Usuario.class);
+			Usuario usr = mapper.readValue(usrJson , Usuario.class);
+			
+			if(dao.isActivo(usr.getId()))
+				return usr;
+			else
+				return null;
+			
 		}
 		else 
 			return null;

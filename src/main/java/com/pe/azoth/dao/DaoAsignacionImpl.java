@@ -32,12 +32,16 @@ public class DaoAsignacionImpl implements DaoAsignacion {
 		try(Connection connection = this.conexion.getConnection()){
 			
 			return new QueryRunner()
-					.query(connection, "SELECT * FROM asignaciones ", new ArrayListHandler())
+					.query(connection, "SELECT a.id_usuario, a.id_producto, a.codigo, p.id_estado "
+							+ "FROM asignaciones a "
+							+ "INNER JOIN productos p ON (p.id_producto = a.id_producto ) "
+							, new ArrayListHandler())
 					.stream()
 					.map(rs -> new Asignacion(
-							(String)rs[1], //ID USUARIO
-							(Integer)rs[0], //ID PRODUCTO
-							(Boolean)rs[2] //ACTIVO 
+							(String)rs[0], //ID USUARIO
+							(Integer)rs[1], //ID PRODUCTO
+							(String)rs[2],//CODIGO PRODUCTO
+							(Integer)rs[3] //ACTIVO 
 							))
 					.collect(Collectors.toList());
 			
@@ -52,12 +56,16 @@ public class DaoAsignacionImpl implements DaoAsignacion {
 		try(Connection connection = this.conexion.getConnection()){
 			
 			return new QueryRunner()
-					.query(connection, "SELECT * FROM asignaciones WHERE id_usuario = ? ", new ArrayListHandler(),idUsuario)
+					.query(connection, "SELECT a.id_usuario, a.id_producto, a.codigo, p.id_estado "
+							+ "FROM asignaciones a "
+							+ "INNER JOIN productos p ON (p.id_producto = a.id_producto ) "
+							+ "WHERE a.id_usuario = ? ", new ArrayListHandler(),idUsuario)
 					.stream()
 					.map(rs -> new Asignacion(
-							(String)rs[1], //ID USUARIO
-							(Integer)rs[0], //ID PRODUCTO
-							(Boolean)rs[2] //ACTIVO 
+							(String)rs[0], //ID USUARIO
+							(Integer)rs[1], //ID PRODUCTO
+							(String)rs[2],//CODIGO PRODUCTO
+							(Integer)rs[3] //ACTIVO 
 							))
 					.collect(Collectors.toList());
 			
@@ -68,21 +76,54 @@ public class DaoAsignacionImpl implements DaoAsignacion {
 	 * @see com.pe.azoth.dao.DaoAsignacion#listAsignaciones(java.lang.Integer)
 	 */
 	@Override
-	public List<Asignacion> listAsignaciones(Integer idProducto) throws SQLException, NamingException{
+	public List<Asignacion> listAsignaciones(Integer idProducto, String codigoProducto) throws SQLException, NamingException{
 		try(Connection connection = this.conexion.getConnection()){
 			
 			return new QueryRunner()
-					.query(connection, "SELECT * FROM asignaciones WHERE id_producto = ? ", new ArrayListHandler(),idProducto)
+					.query(connection, "SELECT a.id_usuario, a.id_producto, a.codigo, p.id_estado "
+							+ "FROM asignaciones a "
+							+ "INNER JOIN productos p ON (p.id_producto = a.id_producto ) "
+							+ "WHERE a.id_producto = ? AND a.codigo = ?", 
+							new ArrayListHandler(),
+							idProducto,codigoProducto)
 					.stream()
 					.map(rs -> new Asignacion(
-							(String)rs[1], //ID USUARIO
-							(Integer)rs[0], //ID PRODUCTO
-							(Boolean)rs[2] //ACTIVO 
+							(String)rs[0], //ID USUARIO
+							(Integer)rs[1], //ID PRODUCTO
+							(String)rs[2],//CODIGO PRODUCTO
+							(Integer)rs[3] //ACTIVO 
 							))
 					.collect(Collectors.toList());
 			
 		}
 	}
+	/* (non-Javadoc)
+	 * @see com.pe.azoth.dao.DaoAsignacion#getAsignacion(java.lang.Integer, java.lang.String)
+	 */
+	@Override
+	public Asignacion getAsignacion(Integer idProducto, String codigoProducto, String idUsuario) throws SQLException, NamingException {
+		
+		try(Connection connection = this.conexion.getConnection()){
+			
+			List<Asignacion> temp =  new QueryRunner()
+					.query(connection,"SELECT a.id_usuario, a.id_producto, a.codigo, p.id_estado "
+							+ "FROM asignaciones a "
+							+ "INNER JOIN productos p ON (p.id_producto = a.id_producto ) "
+							+ "WHERE a.id_usuario = ? AND p.codigo = ? AND p.id_producto = ?", 
+							new ArrayListHandler(),idUsuario,codigoProducto,idProducto)
+					.stream()
+					.map(rs -> new Asignacion(
+							(String)rs[0], //ID USUARIO
+							(Integer)rs[1], //ID PRODUCTO
+							(String)rs[2],//CODIGO PRODUCTO
+							(Integer)rs[3] //ACTIVO 
+							))
+					.collect(Collectors.toList());
+			
+			return (temp.size() == 1)?temp.get(0):null;
+		}
+	}
+	
 	/* (non-Javadoc)
 	 * @see com.pe.azoth.dao.DaoAsignacion#insertAsignacion(com.pe.azoth.beans.Asignacion, java.sql.Connection)
 	 */
@@ -90,13 +131,12 @@ public class DaoAsignacionImpl implements DaoAsignacion {
 	public int insertAsignacion (Asignacion asignacion, Connection connection) throws SQLException {
 		try(PreparedStatement pst = connection.prepareStatement(
 				"INSERT INTO asignaciones "+
-				"(id_producto, id_usuario, activo) "+
+				"(id_producto, id_usuario, codigo) "+
 				"VALUES (?,?,?) ")){
 			
 			pst.setInt(1, asignacion.getProducto());
 			pst.setString(2, asignacion.getUsuario());
-			pst.setBoolean(3, asignacion.isActivo() == null?true:asignacion.isActivo());
-			
+			pst.setString(3,asignacion.getCodProducto());
 			return pst.executeUpdate();
 		}
 	}
@@ -110,31 +150,4 @@ public class DaoAsignacionImpl implements DaoAsignacion {
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see com.pe.azoth.dao.DaoAsignacion#updateAsignacion(com.pe.azoth.beans.Asignacion, java.sql.Connection)
-	 */
-	@Override
-	public int updateAsignacion(Asignacion asignacion,Connection connection) throws SQLException {
-		try(PreparedStatement pst = connection.prepareStatement(
-				"UPDATE asignaciones "+
-				"SET activo = ? "+
-				"WHERE id_usuario = ? AND id_producto = ? ")){
-			
-			pst.setInt(3, asignacion.getProducto());
-			pst.setString(2, asignacion.getUsuario());
-			pst.setBoolean(1, asignacion.isActivo() );
-			
-			return pst.executeUpdate();
-		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see com.pe.azoth.dao.DaoAsignacion#updateAsignacion(com.pe.azoth.beans.Asignacion)
-	 */
-	@Override
-	public int updateAsignacion (Asignacion asignacion) throws SQLException, NamingException {
-		try(Connection connection = this.conexion.getConnection()){
-			return this.updateAsignacion(asignacion,connection);
-		}
-	}
 }

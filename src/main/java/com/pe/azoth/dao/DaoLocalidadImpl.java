@@ -47,7 +47,7 @@ public class DaoLocalidadImpl implements DaoLocalidad {
 	 * @see com.pe.azoth.dao.DaoLocalidad#listLocalidades(int)
 	 */
 	@Override
-	public Localidad listLocalidades(int id) throws SQLException, NamingException{
+	public Localidad getLocalidad(int id) throws SQLException, NamingException{
 		
 		try(Connection connection = this.conexion.getConnection()){
 			

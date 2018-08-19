@@ -14,7 +14,7 @@ public interface DaoCliente {
 
 	List<Cliente> listClientes(String dni) throws SQLException, NamingException;
 
-	Cliente listClientes(Integer idCliente) throws SQLException, NamingException;
+	Cliente getCliente(Integer idCliente) throws SQLException, NamingException;
 
 	int insertCliente(Cliente cliente, Connection connection) throws SQLException, NamingException;
 

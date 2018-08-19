@@ -13,7 +13,7 @@ public class Usuario implements Serializable{
 	 */
 	private static final long serialVersionUID = -5758207726143940780L;
 
-	public Usuario(String id, String pass, String nombres, String apellidos, String dni, String correo, int rango) {
+	public Usuario(String id, String pass, String nombres, String apellidos, String dni, String correo, int rango, Boolean activo) {
 		super();
 		this.id = id;
 		this.pass = pass;
@@ -22,6 +22,7 @@ public class Usuario implements Serializable{
 		this.dni = dni;
 		this.correo = correo;
 		this.rango = rango;
+		this.setActivo(activo);
 	}
 
 	public Usuario() {}
@@ -35,6 +36,7 @@ public class Usuario implements Serializable{
 	private String correo;
 	
 	private int rango;
+	private Boolean activo;
 
 	public String getId() {
 		return id;
@@ -90,6 +92,14 @@ public class Usuario implements Serializable{
 
 	public void setRango(int rango) {
 		this.rango = rango;
+	}
+
+	public Boolean isActivo() {
+		return activo;
+	}
+
+	public void setActivo(Boolean activo) {
+		this.activo = activo;
 	}
 	
 	

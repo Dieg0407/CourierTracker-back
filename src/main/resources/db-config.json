@@ -1,5 +1,5 @@
 {
-	"type-connection" : "program",
+	"type-connection" : "server",
 	
 	"server-connection":{
 		"jndi":"java:/tracker"

@@ -15,4 +15,6 @@ public interface DaoUsuario {
 
 	void insertUsuario(Usuario usuario) throws SQLException, NamingException, NullPointerException;
 
+	boolean isActivo(String idUsuario) throws SQLException, NamingException;
+
 }

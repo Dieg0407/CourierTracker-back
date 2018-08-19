@@ -52,7 +52,8 @@ public class DaoUsuarioImpl implements DaoUsuario {
 						(String) rs[3],//APELLIDOS
 						(String) rs[4],//DNI
 						(String) rs[5],//CORREO
-						(Integer) rs[6]//RANGO
+						(Integer) rs[6],//RANGO
+						(Boolean) rs[7] //ACTIVO
 					))
 					.collect(Collectors.toList());
 			
@@ -80,7 +81,8 @@ public class DaoUsuarioImpl implements DaoUsuario {
 							(String) rs[3],//APELLIDOS
 							(String) rs[4],//DNI
 							(String) rs[5],//CORREO
-							(Integer) rs[6]//RANGO
+							(Integer) rs[6],//RANGO
+							(Boolean) rs[7] //ACTIVO
 					))
 					.collect(Collectors.toList());
 			
@@ -102,8 +104,8 @@ public class DaoUsuarioImpl implements DaoUsuario {
 			);
 			
 			try(PreparedStatement pst = conn.prepareStatement(
-					"INSERT INTO usuarios (id_usuario,pass,nombres,apellidos,dni,correo,id_rango) "+
-					"VALUES (?,?,?,?,?,?,?) ")){
+					"INSERT INTO usuarios (id_usuario,pass,nombres,apellidos,dni,correo,id_rango,activo) "+
+					"VALUES (?,?,?,?,?,?,?,?) ")){
 				
 				pst.setString(1, usuario.getId());
 				pst.setString(2, usuario.getPass());
@@ -112,9 +114,32 @@ public class DaoUsuarioImpl implements DaoUsuario {
 				pst.setString(5, usuario.getDni());
 				pst.setString(6, usuario.getCorreo());
 				pst.setInt(7, usuario.getRango());
+				pst.setBoolean(8, usuario.isActivo() == null ? usuario.isActivo() : null );
 				
 				pst.executeUpdate();
 			}
+		}
+	}
+	
+	@Override
+	public boolean isActivo(String idUsuario) throws SQLException, NamingException {
+		try(Connection connection = conexion.getConnection()){
+			List<Usuario> temp = new QueryRunner()
+					.query(connection,"SELECT * FROM usuarios WHERE id_usuario = ? ", new ArrayListHandler(),idUsuario)
+					.stream()
+					.map(rs -> new Usuario(
+							(String) rs[0],//ID
+							(String) rs[1],//PASS <- Se enviará al Token, no se decodifica
+							(String) rs[2],//NOMBRES
+							(String) rs[3],//APELLIDOS
+							(String) rs[4],//DNI
+							(String) rs[5],//CORREO
+							(Integer) rs[6],//RANGO
+							(Boolean) rs[7] //ACTIVO
+					))
+					.collect(Collectors.toList());
+			
+			return (temp.size() == 1 )? temp.get(0).isActivo() : false;
 		}
 	}
 	

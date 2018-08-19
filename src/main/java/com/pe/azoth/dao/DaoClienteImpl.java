@@ -72,7 +72,7 @@ public class DaoClienteImpl implements DaoCliente {
 	 * @see com.pe.azoth.dao.DaoCliente#listClientes(java.lang.Integer)
 	 */
 	@Override
-	public Cliente listClientes(Integer idCliente) throws SQLException, NamingException{
+	public Cliente getCliente(Integer idCliente) throws SQLException, NamingException{
 		try(Connection connection = this.conexion.getConnection()){
 			List<Cliente> lista = new QueryRunner()
 					.query(connection, "SELECT * FROM clientes WHERE id_cliente = ? ",new ArrayListHandler(),idCliente)
