@@ -134,6 +134,7 @@ public class CourierService {
 	@POST
 	@Path("/updateProducto")
 	@Consumes(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 	public Response updateProducto(
 			@HeaderParam("token") @DefaultValue("") String jwt,
 			Producto producto) throws JsonProcessingException {
@@ -147,9 +148,9 @@ public class CourierService {
 				Asignacion a = daoAsignacion.getAsignacion(producto.getId(),producto.getCodigo(),usr.getId());
 				if( a != null )
 					if(daoProducto.updateProducto(producto) == 1)
-						return Response.status(Response.Status.ACCEPTED).build();
+						return Response.status(Response.Status.ACCEPTED).entity("{\"state\":\"success\"}").build();
 				
-				return Response.notModified().build();
+				return Response.notModified().entity("{\"state\":\"notModified\"}").build();
 			}
 			else
 				throw this.exception(Response.Status.UNAUTHORIZED, "ERROR DE AUTENTICACIÓN");
