@@ -172,6 +172,7 @@ public class DaoProductoImpl implements DaoProducto {
 	@Override
 	public int insertProducto(Producto producto) throws SQLException, NamingException {
 		try(Connection connection = this.conexion.getConnection()){
+			producto.setId(this.getNextIdProducto(producto.getCodigo()));
 			return this.insertProducto(producto,connection);
 		}
 	}
@@ -220,6 +221,18 @@ public class DaoProductoImpl implements DaoProducto {
 				
 			}
 			
+		}
+	}
+	
+	public int getNextIdProducto(String codigo, Connection connection) throws SQLException, NamingException{
+		try(PreparedStatement pst = connection.prepareStatement("select IFNULL(MAX(id_producto), 0) + 1  "
+				+ "from courier_tracker.productos where codigo = ?")){
+			pst.setString(1, codigo);
+			
+			try(ResultSet rs = pst.executeQuery()){
+				rs.next();
+				return rs.getInt(1);
+			}
 		}
 	}
 	

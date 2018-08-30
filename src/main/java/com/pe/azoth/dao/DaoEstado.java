@@ -11,6 +11,6 @@ public interface DaoEstado {
 
 	List<Estado> listEstados() throws SQLException, NamingException;
 
-	Estado listEstados(int id) throws SQLException, NamingException;
+	Estado getEstado(int id) throws SQLException, NamingException;
 
 }

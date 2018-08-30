@@ -114,7 +114,7 @@ public class DaoUsuarioImpl implements DaoUsuario {
 				pst.setString(5, usuario.getDni());
 				pst.setString(6, usuario.getCorreo());
 				pst.setInt(7, usuario.getRango());
-				pst.setBoolean(8, usuario.isActivo() == null ? usuario.isActivo() : null );
+				pst.setBoolean(8, usuario.isActivo() == null ? true : usuario.isActivo()  );
 				
 				pst.executeUpdate();
 			}
@@ -177,6 +177,81 @@ public class DaoUsuarioImpl implements DaoUsuario {
 			
 			e.printStackTrace(System.err);
 			throw new NullPointerException("Error en la codificación");
+		}
+	}
+
+	@Override
+	public List<Usuario> listUsuarios(String not_consider) throws SQLException, NamingException, NullPointerException {
+		try(Connection conn = conexion.getConnection()){
+			return new QueryRunner()
+					.query( conn, 
+							"SELECT * FROM usuarios where id_usuario != ? AND id_usuario != 'admin' ", 
+							new ArrayListHandler(), 
+							not_consider)
+					.stream()
+					.map(rs -> new Usuario(
+						(String) rs[0],//ID
+						this.decodePass( (String) rs[1] ,DaoUsuarioImpl.coded),//PASS
+						(String) rs[2],//NOMBRES
+						(String) rs[3],//APELLIDOS
+						(String) rs[4],//DNI
+						(String) rs[5],//CORREO
+						(Integer) rs[6],//RANGO
+						(Boolean) rs[7] //ACTIVO
+					))
+					.collect(Collectors.toList());
+			
+		}
+	}
+
+	@Override
+	public Usuario getUsuario(String id) throws SQLException, NamingException, NullPointerException {
+		try(Connection conn = conexion.getConnection()){
+			List<Usuario> res = 
+					new QueryRunner()
+					.query(conn,  
+							"SELECT * FROM usuarios WHERE id_usuario = ? ",
+							new ArrayListHandler(),
+							id )
+					.stream()
+					.map(rs -> new Usuario(
+							(String) rs[0],//ID
+							(String) rs[1],//PASS <- Se enviará al Token, no se decodifica
+							(String) rs[2],//NOMBRES
+							(String) rs[3],//APELLIDOS
+							(String) rs[4],//DNI
+							(String) rs[5],//CORREO
+							(Integer) rs[6],//RANGO
+							(Boolean) rs[7] //ACTIVO
+					))
+					.collect(Collectors.toList());
+			
+			if(res.size() == 1)
+				return res.get(0);
+			else
+				return null;
+		}
+	}
+
+	@Override
+	public int updateUsuario(Usuario usuario, boolean newPass) throws SQLException, NamingException {
+		try(Connection conn = conexion.getConnection()){
+			try(PreparedStatement pst = conn.prepareStatement(
+					"UPDATE usuarios "+
+					"SET pass = ?, nombres = ?, apellidos = ?, dni = ?, correo = ?, id_rango = ?, activo = ? "+
+					"WHERE id_usuario = ? ")){
+				pst.setString(1, newPass?this.encodePass(usuario.getPass(), DaoUsuarioImpl.coded):usuario.getPass());
+				pst.setString(2, usuario.getNombres());
+				pst.setString(3, usuario.getApellidos());
+				pst.setString(4, usuario.getDni());
+				pst.setString(5, usuario.getCorreo());
+				pst.setInt(6, usuario.getRango());
+				pst.setBoolean(7, usuario.isActivo());
+				
+				pst.setString(8, usuario.getId());
+				
+				return pst.executeUpdate();
+			}
 		}
 	}
 }

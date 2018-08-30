@@ -26,7 +26,7 @@ public interface DaoProducto {
 	 * @throws NamingException
 	 */
 	List<Producto> listProductos(String...strings ) throws SQLException, NamingException;
-
+	
 	/**
 	 * Obtienes un producto por su ID unico
 	 * @param id
@@ -67,7 +67,7 @@ public interface DaoProducto {
 	 * @throws SQLException
 	 * @throws NamingException
 	 */
-	int getNextIdProducto(String codigo) throws SQLException, NamingException;
+	 int getNextIdProducto(String codigo) throws SQLException, NamingException;
 	
 	/**
 	 * Retorna una Lista con todos los codigos que existen actualmente en la BD

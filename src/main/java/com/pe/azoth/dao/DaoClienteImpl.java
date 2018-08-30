@@ -90,6 +90,25 @@ public class DaoClienteImpl implements DaoCliente {
 			return (lista.size() == 1)?lista.get(0):null;
 		}
 	}
+	@Override
+	public Cliente getCliente(String dni) throws SQLException, NamingException {
+		try(Connection connection = this.conexion.getConnection()){
+			List<Cliente> lista = new QueryRunner()
+					.query(connection, "SELECT * FROM clientes WHERE dni = ? ",new ArrayListHandler(),dni)
+					.stream()
+					.map( rs -> new Cliente(
+							(Integer)rs[0],//ID
+							(String)rs[1],//NOMBRES
+							(String)rs[2],//APELLIDOS
+							(String)rs[3],//DNI
+							(String)rs[4],//DIRECCION
+							(String)rs[5],//CELULAR
+							(String)rs[6]//CORREO
+							))
+					.collect(Collectors.toList());
+			return (lista.size() == 1)?lista.get(0):null;
+		}
+	}
 	
 	/* (non-Javadoc)
 	 * @see com.pe.azoth.dao.DaoCliente#insertCliente(com.pe.azoth.beans.Cliente, java.sql.Connection)
@@ -151,4 +170,6 @@ public class DaoClienteImpl implements DaoCliente {
 			return this.updateCliente(cliente,connection);
 		}
 	}
+
+	
 }

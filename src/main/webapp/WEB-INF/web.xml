@@ -22,7 +22,7 @@
 		</init-param>
 		<init-param>
 			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
-			<param-value>com.pe.azoth.servicios.autenticacion.CORSFilter</param-value>
+			<param-value>com.pe.azoth.servicios.autenticacion.CORSFilterAutentication</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
@@ -48,7 +48,7 @@
 		</init-param>
 		<init-param>
 			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
-			<param-value>com.pe.azoth.servicios.tracker.CORSFilter</param-value>
+			<param-value>com.pe.azoth.servicios.tracker.CORSFilterTracker</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>

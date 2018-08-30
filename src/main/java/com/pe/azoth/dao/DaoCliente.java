@@ -24,4 +24,6 @@ public interface DaoCliente {
 
 	int updateCliente(Cliente cliente) throws SQLException, NamingException;
 
+	Cliente getCliente(String dni) throws SQLException, NamingException;
+
 }

@@ -47,7 +47,7 @@ public class DaoEstadoImpl implements DaoEstado {
 	 * @see com.pe.azoth.dao.DaoEstado#listEstados(int)
 	 */
 	@Override
-	public Estado listEstados(int id) throws SQLException, NamingException{
+	public Estado getEstado (int id) throws SQLException, NamingException{
 		
 		try(Connection connection = this.conexion.getConnection()){
 			
