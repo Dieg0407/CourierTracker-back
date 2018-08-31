@@ -13,14 +13,13 @@ public class Cliente {
 		this.id = id;
 	}
 	
-	public Cliente(int id, String nombres, String apellidos, String dni, String direccion, String celular,
+	public Cliente(int id, String nombres, String apellidos, String dni, String celular,
 			String correo) {
 		super();
 		this.id = id;
 		this.nombres = nombres;
 		this.apellidos = apellidos;
 		this.dni = dni;
-		this.direccion = direccion;
 		this.celular = celular;
 		this.correo = correo;
 	}
@@ -28,7 +27,6 @@ public class Cliente {
 	private String nombres;
 	private String apellidos;
 	private String dni;
-	private String direccion;
 	private String celular;
 	private String correo;
 	public int getId() {
@@ -55,12 +53,7 @@ public class Cliente {
 	public void setDni(String dni) {
 		this.dni = dni;
 	}
-	public String getDireccion() {
-		return direccion;
-	}
-	public void setDireccion(String direccion) {
-		this.direccion = direccion;
-	}
+	
 	public String getCelular() {
 		return celular;
 	}

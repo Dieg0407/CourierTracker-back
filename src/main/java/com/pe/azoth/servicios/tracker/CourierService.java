@@ -34,8 +34,6 @@ import com.pe.azoth.dao.DaoCliente;
 import com.pe.azoth.dao.DaoClienteImpl;
 import com.pe.azoth.dao.DaoEstado;
 import com.pe.azoth.dao.DaoEstadoImpl;
-import com.pe.azoth.dao.DaoLocalidad;
-import com.pe.azoth.dao.DaoLocalidadImpl;
 import com.pe.azoth.dao.DaoProducto;
 import com.pe.azoth.dao.DaoProductoImpl;
 import com.pe.azoth.dao.DaoUsuario;
@@ -45,6 +43,46 @@ import com.pe.azoth.modelo.JWTManager;
 @Path("/")
 public class CourierService {
 	
+	@POST
+	@Path("/listProductos")
+	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	public List<Producto> listProductos(
+		@HeaderParam("token") @DefaultValue("") String jwt) throws JsonProcessingException{
+		
+		JWTManager jwtManager = new JWTManager();
+		try {
+			Usuario usr = jwtManager.parseJWT(jwt);
+			if(usr != null){
+				
+				DaoProducto daoProducto = new DaoProductoImpl();
+				DaoCliente daoCliente  = new DaoClienteImpl();
+				DaoEstado daoEstado = new DaoEstadoImpl();
+
+				List<Producto> productos = daoProducto.listProductos();
+				
+				for(Producto p : productos) {
+					//CAMBIOS CON EL MODELO
+					//p.setOrigen(daoLocalidad.getLocalidad(p.getOrigen().getId()));
+					//p.setDestino(daoLocalidad.getLocalidad(p.getDestino().getId()));
+					p.setEnvio(daoCliente.getCliente(p.getEnvio().getId()));
+					p.setRecepcion(daoCliente.getCliente(p.getRecepcion().getId()));
+					p.setEstado(daoEstado.getEstado(p.getEstado().getId()));
+				}
+				
+				return productos;
+			}
+			else
+				throw new WebApplicationException(
+						this.exception(Response.Status.UNAUTHORIZED, "ERROR DE AUTENTICACIÓN")
+				);
+		} 
+		catch (IOException | SQLException | NamingException e) {
+			e.printStackTrace(System.err);
+			throw new WebApplicationException(
+					this.exception(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage())
+			);
+		}
+	}
 	
 	//OBTENER LOS REGISTROS
 	@POST
@@ -60,13 +98,12 @@ public class CourierService {
 				
 				DaoProducto daoProducto = new DaoProductoImpl();
 				DaoAsignacion daoAsignacion = new DaoAsignacionImpl();
-				DaoLocalidad daoLocalidad = new DaoLocalidadImpl();
 				DaoCliente daoCliente  = new DaoClienteImpl();
 				DaoEstado daoEstado = new DaoEstadoImpl();
 				
-				List<String> temp = daoAsignacion.listAsignaciones(usr.getId())
+				List<String> temp = daoAsignacion.listAsignaciones(usr.getCorreo())
 				.stream()
-				.map(as -> as.getCodProducto()+"-"+as.getProducto())
+				.map(as -> as.getCodProducto()+"-"+as.getNroProducto())
 				.collect(Collectors.toList());
 				
 
@@ -75,8 +112,9 @@ public class CourierService {
 				List<Producto> productos = daoProducto.listProductos(array);
 				
 				for(Producto p : productos) {
-					p.setOrigen(daoLocalidad.getLocalidad(p.getOrigen().getId()));
-					p.setDestino(daoLocalidad.getLocalidad(p.getDestino().getId()));
+					//CAMBIOS CON EL MODELO
+					//p.setOrigen(daoLocalidad.getLocalidad(p.getOrigen().getId()));
+					//p.setDestino(daoLocalidad.getLocalidad(p.getDestino().getId()));
 					p.setEnvio(daoCliente.getCliente(p.getEnvio().getId()));
 					p.setRecepcion(daoCliente.getCliente(p.getRecepcion().getId()));
 					p.setEstado(daoEstado.getEstado(p.getEstado().getId()));
@@ -102,7 +140,7 @@ public class CourierService {
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 	public Producto getProducto(
 			@HeaderParam("token") @DefaultValue("") String jwt, 
-			@FormParam("id_producto") @DefaultValue("-1") int id_producto,
+			@FormParam("numero") @DefaultValue("-1") int numero,
 			@FormParam("codigo") @DefaultValue("") String codigo) throws JsonProcessingException {
 		
 		try {
@@ -111,21 +149,22 @@ public class CourierService {
 			if(usr != null) {
 				DaoProducto daoProducto = new DaoProductoImpl();
 				DaoAsignacion daoAsignacion = new DaoAsignacionImpl();
-				DaoLocalidad daoLocalidad = new DaoLocalidadImpl();
+				//DaoLocalidad daoLocalidad = new DaoLocalidadImpl();
 				DaoCliente daoCliente  = new DaoClienteImpl();
 				
-				Asignacion a = daoAsignacion.getAsignacion(id_producto,codigo,usr.getId());
+				Asignacion a = daoAsignacion.getAsignacion(numero,codigo, usr.getCorreo());
 				if(a != null) {
-					Producto p = daoProducto.getProducto(id_producto, codigo);
-					p.setOrigen(daoLocalidad.getLocalidad(p.getOrigen().getId()));
-					p.setDestino(daoLocalidad.getLocalidad(p.getDestino().getId()));
+					Producto p = daoProducto.getProducto(numero, codigo);
+					//p.setOrigen(daoLocalidad.getLocalidad(p.getOrigen().getId()));
+					//p.setDestino(daoLocalidad.getLocalidad(p.getDestino().getId()));
 					p.setEnvio(daoCliente.getCliente(p.getEnvio().getId()));
 					p.setRecepcion(daoCliente.getCliente(p.getRecepcion().getId()));
 					return p;
 				}
 					
 				else
-					throw this.exception(Response.Status.UNAUTHORIZED, "EL USUARIO NO TIENE ASIGNACION UN PRODUCTO CON EL CODIGO+ID: "+codigo+"-"+id_producto);
+					throw this.exception(Response.Status.UNAUTHORIZED, 
+							"EL USUARIO NO TIENE ASIGNACION UN PRODUCTO CON EL CODIGO+ID: "+codigo+"-"+numero);
 			}
 			else
 				throw this.exception(Response.Status.UNAUTHORIZED, "ERROR DE AUTENTICACIÓN");
@@ -138,8 +177,6 @@ public class CourierService {
 			);
 		}	
 	}
-	
-	
 	@POST
 	@Path("/updateProducto")
 	@Consumes(MediaType.APPLICATION_JSON + ";charset=utf-8")
@@ -154,7 +191,10 @@ public class CourierService {
 			if(usr != null) {
 				DaoAsignacion daoAsignacion =  new DaoAsignacionImpl();
 				DaoProducto daoProducto =  new DaoProductoImpl();
-				Asignacion a = daoAsignacion.getAsignacion(producto.getId(),producto.getCodigo(),usr.getId());
+				
+				Asignacion a = daoAsignacion.getAsignacion(producto.getNumero(),
+						producto.getCodigo(),usr.getCorreo());
+				
 				if( a != null )
 					if(daoProducto.updateProducto(producto) == 1)
 						return Response.status(Response.Status.ACCEPTED).entity("{\"state\":\"success\"}").build();
@@ -173,6 +213,79 @@ public class CourierService {
 	}
 	
 	@POST
+	@Path("/updateProductoConsola")
+	@Consumes(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	public Response updateProductoConsola(
+			@HeaderParam("token") @DefaultValue("") String jwt,
+			Producto producto) throws JsonProcessingException {
+		
+		try {
+			JWTManager jwtManager = new JWTManager();
+			Usuario usr = jwtManager.parseJWT(jwt);
+			if(usr != null) {
+				//DaoAsignacion daoAsignacion =  new DaoAsignacionImpl();
+				//if( a != null )
+				if(update(producto) == 1)
+					return Response.status(Response.Status.OK).build();
+				
+				return Response.notModified().entity("{\"message\":\"no se pudo anular el producto\"}").build();
+			}
+			else
+				throw this.exception(Response.Status.UNAUTHORIZED, "ERROR DE AUTENTICACIÓN");
+		}
+		catch (IOException | SQLException | NamingException e) {
+			e.printStackTrace(System.err);
+			throw new WebApplicationException(
+					this.exception(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage())
+			);
+		}
+	}
+	
+	private int update (Producto producto) throws IOException, NamingException, SQLException {
+		DaoProducto daoProducto = new DaoProductoImpl();
+		DaoCliente daoCliente = new DaoClienteImpl();
+		Connection connection = null;
+		try{
+			connection = new Conexion().getConnection();
+			connection.setAutoCommit(false);
+
+			Cliente cliente = daoCliente.getCliente(producto.getEnvio().getDni());
+
+			if(cliente == null)
+				producto.getEnvio().setId( 
+					daoCliente.insertCliente(producto.getEnvio(), connection)
+				);
+			else{
+				producto.getEnvio().setId(cliente.getId());
+				daoCliente.updateCliente(producto.getEnvio());
+			}
+
+			cliente = daoCliente.getCliente(producto.getRecepcion().getDni());
+			if(daoCliente.getCliente(producto.getRecepcion().getDni()) == null)
+				producto.getRecepcion().setId( 
+					daoCliente.insertCliente(producto.getRecepcion(), connection)
+				);
+			else{
+				producto.getRecepcion().setId(cliente.getId());
+				daoCliente.updateCliente(producto.getRecepcion());
+			}
+			
+			connection.commit();
+
+			int ret = daoProducto.updateProducto(producto, connection);
+			connection.commit();
+			connection.close();
+			
+			return ret;
+		}
+		catch(SQLException e) {
+			try { connection.rollback(); } catch(Exception ex) {}
+			throw e;
+		}
+	}
+	
+	@POST
 	@Path("/insertProducto")
 	@Consumes(MediaType.APPLICATION_JSON + ";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
@@ -184,8 +297,8 @@ public class CourierService {
 			Usuario usr = jwtManager.parseJWT(jwt);
 			if(usr != null) {
 				try {
-					insert(producto);
-					return Response.ok().build();
+					int ret = insert(producto);
+					return Response.ok().entity("{\"codigo\":\""+producto.getCodigo()+"-"+ret+"\"}").build();
 				}
 				catch(IOException | SQLException | NamingException e) {
 					e.printStackTrace(System.err);
@@ -202,7 +315,7 @@ public class CourierService {
 		}
 	}
 	
-	private synchronized void insert(Producto producto) throws IOException, NamingException, SQLException {
+	private int insert(Producto producto) throws IOException, NamingException, SQLException {
 		DaoProducto daoProducto = new DaoProductoImpl();
 		DaoCliente daoCliente = new DaoClienteImpl();
 		Connection connection = null;
@@ -211,14 +324,33 @@ public class CourierService {
 			
 			connection.setAutoCommit(false);
 			
-			if(daoCliente.getCliente(producto.getEnvio().getId()) == null)
-				daoCliente.insertCliente(producto.getEnvio(), connection);
-			if(daoCliente.getCliente(producto.getRecepcion().getId()) == null)
-				daoCliente.insertCliente(producto.getRecepcion(), connection);
-			daoProducto.insertProducto(producto, connection);
+			Cliente cliente = daoCliente.getCliente(producto.getEnvio().getDni());
+
+			if(cliente == null)
+				producto.getEnvio().setId( 
+					daoCliente.insertCliente(producto.getEnvio(), connection)
+				);
+			else{
+				producto.getEnvio().setId(cliente.getId());
+				daoCliente.updateCliente(producto.getEnvio());
+			}
+
+			cliente = daoCliente.getCliente(producto.getRecepcion().getDni());
+			if(daoCliente.getCliente(producto.getRecepcion().getDni()) == null)
+				producto.getRecepcion().setId( 
+					daoCliente.insertCliente(producto.getRecepcion(), connection)
+				);
+			else{
+				producto.getRecepcion().setId(cliente.getId());
+				daoCliente.updateCliente(producto.getRecepcion());
+			}
+			
+			
+			int ret = daoProducto.insertProducto(producto, connection);
 			
 			connection.commit();
 			connection.close();
+			return ret;
 		}
 		catch(SQLException e) {
 			try { connection.rollback(); } catch(Exception ex) {}
@@ -231,16 +363,15 @@ public class CourierService {
 	@Consumes(MediaType.APPLICATION_JSON + ";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 	public List<Usuario> listUsuarios(
-			@HeaderParam("token") @DefaultValue("") String token,
-			String json) throws JsonProcessingException{
+			@HeaderParam("token") @DefaultValue("") String token) throws JsonProcessingException{
 		
-		ObjectMapper mapper = new ObjectMapper();
 		try {
 			JWTManager jwtManager = new JWTManager();
+			
 			if(jwtManager.parseJWT(token) != null) {
 				DaoUsuario daoUsuarios = new DaoUsuarioImpl();
 				return daoUsuarios.listUsuarios(
-						mapper.readTree(json).get("id_usuario").textValue()
+						"admin@local.ed" //NO SE PUEDE LISTAR EL USUARIO ADMINISTRADOR
 				);
 			}
 			else
@@ -268,7 +399,7 @@ public class CourierService {
 			if(jwtManager.parseJWT(token) != null) {
 				DaoUsuario daoUsuarios = new DaoUsuarioImpl();
 				Usuario response =  daoUsuarios.getUsuario(
-						mapper.readTree(jsonBody).get("id_usuario").textValue()
+						mapper.readTree(jsonBody).get("correo").textValue()
 				);
 				if(response != null)
 					return response;
@@ -367,7 +498,6 @@ public class CourierService {
 				
 				DaoCliente daoCliente = new DaoClienteImpl();
 				JsonNode json = new ObjectMapper().readTree(jsonObject);
-				System.err.println(json.get("dni").textValue());
 				
 				return daoCliente.getCliente(json.get("dni").textValue());
 			}

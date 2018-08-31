@@ -6,10 +6,10 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
 public class Asignacion {
-	public Asignacion(String usuario, int producto, String codProducto, Integer estado) {
+	public Asignacion(String correoUsuario, String codProducto, int nroProducto, Integer estado) {
 		super();
-		this.usuario = usuario;
-		this.producto = producto;
+		this.correoUsuario = correoUsuario;
+		this.nroProducto = nroProducto;
 		this.estado = estado;
 		this.codProducto = codProducto;
 	}
@@ -17,17 +17,17 @@ public class Asignacion {
 	public Asignacion() {}
 	
 	
-	private String usuario;
+	private String correoUsuario;
 	private String codProducto;
-	private int producto;
+	private int nroProducto;
 	private Integer estado;
 	
-	@JsonProperty("id_usuario")
-	public String getUsuario() {
-		return usuario;
+	@JsonProperty("correo_usuario")
+	public String getCorreoUsuario() {
+		return correoUsuario;
 	}
-	public void setIdUsuario(String usuario) {
-		this.usuario = usuario;
+	public void setCorreoUsuario(String usuario) {
+		this.correoUsuario = usuario;
 	}
 	@JsonProperty("estado")
 	public Integer getEstado() {
@@ -36,15 +36,14 @@ public class Asignacion {
 	public void setEstado(Integer estado) {
 		this.estado = estado;
 	}
-	@JsonProperty("id_producto")
-	public int getProducto() {
-		return producto;
+	@JsonProperty("nro_producto")
+	public int getNroProducto() {
+		return nroProducto;
 	}
-	public void setIdProducto(int producto) {
-		this.producto = producto;
+	public void setNroProducto(int producto) {
+		this.nroProducto = producto;
 	}
-
-	@JsonProperty("codigo")
+	@JsonProperty("codigo_producto")
 	public String getCodProducto(){
 		return this.codProducto;
 	}

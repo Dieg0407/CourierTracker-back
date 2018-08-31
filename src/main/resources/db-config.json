@@ -2,7 +2,7 @@
 	"type-connection" : "server",
 	
 	"server-connection":{
-		"jndi":"java:/tracker"
+		"jndi":"java/tracker"
 	},
 	"program-connection":{
 		"user":"root",

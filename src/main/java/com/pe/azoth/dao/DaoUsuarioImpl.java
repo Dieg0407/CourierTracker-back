@@ -43,18 +43,46 @@ public class DaoUsuarioImpl implements DaoUsuario {
 	public List<Usuario> listUsuarios() throws SQLException, NamingException, NullPointerException{
 		try(Connection conn = conexion.getConnection()){
 			return new QueryRunner()
-					.query( conn, "SELECT * FROM usuarios", new ArrayListHandler())
+					.query( conn, 
+							"SELECT correo,pass,nombres,apellidos,dni,id_rango,activo "
+							+ "FROM usuarios "
+							+ "order by activo desc ", new ArrayListHandler())
 					.stream()
 					.map(rs -> new Usuario(
-						(String) rs[0],//ID
-						this.decodePass( (String) rs[1] ,DaoUsuarioImpl.coded),//PASS
-						(String) rs[2],//NOMBRES
-						(String) rs[3],//APELLIDOS
-						(String) rs[4],//DNI
-						(String) rs[5],//CORREO
-						(Integer) rs[6],//RANGO
-						(Boolean) rs[7] //ACTIVO
-					))
+							(String) rs[0],//CORREO
+							this.decodePass( (String) rs[1] , DaoUsuarioImpl.coded ),//PASS
+							(String) rs[2],//NOMBRES
+							(String) rs[3],//APELLIDOS
+							(String) rs[4],//DNI
+							(Integer) rs[5],//RANGO
+							(Boolean) rs[6] //ACTIVO
+						))
+					.collect(Collectors.toList());
+			
+		}
+	}
+	
+	@Override
+	public List<Usuario> listUsuarios(String not_consider) throws SQLException, NamingException, NullPointerException {
+		try(Connection conn = conexion.getConnection()){
+			return new QueryRunner()
+					.query( conn, 
+							"SELECT correo,pass,nombres,apellidos,dni,id_rango,activo "
+							+ "FROM usuarios "
+							+ "WHERE correo != ? "
+							+ "ORDER BY activo desc", 
+							new ArrayListHandler(), 
+							not_consider)
+					.stream()
+					.map(rs -> new Usuario(
+							(String) rs[0],//CORREO
+							this.decodePass( (String) rs[1] , DaoUsuarioImpl.coded ),//PASS
+							(String) rs[2],//NOMBRES
+							(String) rs[3],//APELLIDOS
+							(String) rs[4],//DNI
+							(Integer) rs[5],//RANGO
+							(Boolean) rs[6] //ACTIVO
+						))
 					.collect(Collectors.toList());
 			
 		}
@@ -64,26 +92,26 @@ public class DaoUsuarioImpl implements DaoUsuario {
 	 * @see com.pe.azoth.dao.UsuarioDao#getUsuario(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public Usuario getUsuario(String id, String pass) throws SQLException, NamingException , NullPointerException{
+	public Usuario getUsuario(String correo, String pass) throws SQLException, NamingException , NullPointerException{
 		try(Connection conn = conexion.getConnection()){
 			pass = this.encodePass(pass, DaoUsuarioImpl.coded);		
 			List<Usuario> res = 
 					new QueryRunner()
 					.query(conn,  
-							"SELECT * FROM usuarios WHERE pass = ? AND (id_usuario = ? OR correo = ? )",
+							"SELECT correo,pass,nombres,apellidos,dni,id_rango,activo "
+							+ "FROM usuarios WHERE pass = ? AND correo = ? ",
 							new ArrayListHandler(),
-							pass , id , id)
+							pass , correo )
 					.stream()
 					.map(rs -> new Usuario(
-							(String) rs[0],//ID
-							(String) rs[1],//PASS <- Se enviará al Token, no se decodifica
+							(String) rs[0],//CORREO
+							this.decodePass( (String) rs[1] , DaoUsuarioImpl.coded ),//PASS
 							(String) rs[2],//NOMBRES
 							(String) rs[3],//APELLIDOS
 							(String) rs[4],//DNI
-							(String) rs[5],//CORREO
-							(Integer) rs[6],//RANGO
-							(Boolean) rs[7] //ACTIVO
-					))
+							(Integer) rs[5],//RANGO
+							(Boolean) rs[6] //ACTIVO
+						))
 					.collect(Collectors.toList());
 			
 			if(res.size() == 1)
@@ -93,6 +121,35 @@ public class DaoUsuarioImpl implements DaoUsuario {
 		}
 	}
 	
+	@Override
+	public Usuario getUsuario(String correo) throws SQLException, NamingException, NullPointerException {
+		try(Connection conn = conexion.getConnection()){
+			List<Usuario> res = 
+					new QueryRunner()
+					.query(conn,  
+							"SELECT correo,pass,nombres,apellidos,dni,id_rango,activo "
+							+ "FROM usuarios "
+							+ "WHERE correo = ? ",
+							new ArrayListHandler(),
+							correo )
+					.stream()
+					.map(rs -> new Usuario(
+							(String) rs[0],//CORREO
+							this.decodePass( (String) rs[1] , DaoUsuarioImpl.coded ),//PASS
+							(String) rs[2],//NOMBRES
+							(String) rs[3],//APELLIDOS
+							(String) rs[4],//DNI
+							(Integer) rs[5],//RANGO
+							(Boolean) rs[6] //ACTIVO
+						))
+					.collect(Collectors.toList());
+			
+			if(res.size() == 1)
+				return res.get(0);
+			else
+				return null;
+		}
+	}
 	/* (non-Javadoc)
 	 * @see com.pe.azoth.dao.UsuarioDao#insertUsuario(com.pe.azoth.beans.Usuario)
 	 */
@@ -104,17 +161,17 @@ public class DaoUsuarioImpl implements DaoUsuario {
 			);
 			
 			try(PreparedStatement pst = conn.prepareStatement(
-					"INSERT INTO usuarios (id_usuario,pass,nombres,apellidos,dni,correo,id_rango,activo) "+
-					"VALUES (?,?,?,?,?,?,?,?) ")){
+					"INSERT INTO usuarios "
+					+ "(pass,nombres,apellidos,dni,correo,id_rango,activo) "+
+					"VALUES (?,?,?,?,?,?,?) ")){
 				
-				pst.setString(1, usuario.getId());
-				pst.setString(2, usuario.getPass());
-				pst.setString(3, usuario.getNombres());
-				pst.setString(4, usuario.getApellidos());
-				pst.setString(5, usuario.getDni());
-				pst.setString(6, usuario.getCorreo());
-				pst.setInt(7, usuario.getRango());
-				pst.setBoolean(8, usuario.isActivo() == null ? true : usuario.isActivo()  );
+				pst.setString(1, usuario.getPass());
+				pst.setString(2, usuario.getNombres());
+				pst.setString(3, usuario.getApellidos());
+				pst.setString(4, usuario.getDni());
+				pst.setString(5, usuario.getCorreo());
+				pst.setInt(6, usuario.getRango());
+				pst.setBoolean(7, usuario.isActivo() == null ? true : usuario.isActivo()  );
 				
 				pst.executeUpdate();
 			}
@@ -122,24 +179,48 @@ public class DaoUsuarioImpl implements DaoUsuario {
 	}
 	
 	@Override
-	public boolean isActivo(String idUsuario) throws SQLException, NamingException {
+	public boolean isActivo(String correo) throws SQLException, NamingException {
 		try(Connection connection = conexion.getConnection()){
 			List<Usuario> temp = new QueryRunner()
-					.query(connection,"SELECT * FROM usuarios WHERE id_usuario = ? ", new ArrayListHandler(),idUsuario)
+					.query(connection,
+							"SELECT correo,pass,nombres,apellidos,dni,id_rango,activo "
+							+ "FROM usuarios "
+							+ "WHERE correo = ? ", new ArrayListHandler(),correo)
 					.stream()
 					.map(rs -> new Usuario(
-							(String) rs[0],//ID
-							(String) rs[1],//PASS <- Se enviará al Token, no se decodifica
+							(String) rs[0],//CORREO
+							this.decodePass( (String) rs[1] , DaoUsuarioImpl.coded ),//PASS
 							(String) rs[2],//NOMBRES
 							(String) rs[3],//APELLIDOS
 							(String) rs[4],//DNI
-							(String) rs[5],//CORREO
-							(Integer) rs[6],//RANGO
-							(Boolean) rs[7] //ACTIVO
-					))
+							(Integer) rs[5],//RANGO
+							(Boolean) rs[6] //ACTIVO
+						))
 					.collect(Collectors.toList());
 			
 			return (temp.size() == 1 )? temp.get(0).isActivo() : false;
+		}
+	}
+	
+	@Override
+	public int updateUsuario(Usuario usuario, boolean newPass) throws SQLException, NamingException {
+		try(Connection conn = conexion.getConnection()){
+			try(PreparedStatement pst = conn.prepareStatement(
+					"UPDATE usuarios "+
+					"SET pass = ?, nombres = ?, apellidos = ?, dni = ?, id_rango = ?, activo = ? "+
+					"WHERE correo = ? ")){
+				
+				pst.setString(1, newPass?this.encodePass(usuario.getPass(), DaoUsuarioImpl.coded):usuario.getPass());
+				pst.setString(2, usuario.getNombres());
+				pst.setString(3, usuario.getApellidos());
+				pst.setString(4, usuario.getDni());
+				pst.setInt(5, usuario.getRango());
+				pst.setBoolean(6, usuario.isActivo() == null ? true : usuario.isActivo() );
+				
+				pst.setString(7, usuario.getCorreo());
+				
+				return pst.executeUpdate();
+			}
 		}
 	}
 	
@@ -180,78 +261,5 @@ public class DaoUsuarioImpl implements DaoUsuario {
 		}
 	}
 
-	@Override
-	public List<Usuario> listUsuarios(String not_consider) throws SQLException, NamingException, NullPointerException {
-		try(Connection conn = conexion.getConnection()){
-			return new QueryRunner()
-					.query( conn, 
-							"SELECT * FROM usuarios where id_usuario != ? AND id_usuario != 'admin' ", 
-							new ArrayListHandler(), 
-							not_consider)
-					.stream()
-					.map(rs -> new Usuario(
-						(String) rs[0],//ID
-						this.decodePass( (String) rs[1] ,DaoUsuarioImpl.coded),//PASS
-						(String) rs[2],//NOMBRES
-						(String) rs[3],//APELLIDOS
-						(String) rs[4],//DNI
-						(String) rs[5],//CORREO
-						(Integer) rs[6],//RANGO
-						(Boolean) rs[7] //ACTIVO
-					))
-					.collect(Collectors.toList());
-			
-		}
-	}
-
-	@Override
-	public Usuario getUsuario(String id) throws SQLException, NamingException, NullPointerException {
-		try(Connection conn = conexion.getConnection()){
-			List<Usuario> res = 
-					new QueryRunner()
-					.query(conn,  
-							"SELECT * FROM usuarios WHERE id_usuario = ? ",
-							new ArrayListHandler(),
-							id )
-					.stream()
-					.map(rs -> new Usuario(
-							(String) rs[0],//ID
-							(String) rs[1],//PASS <- Se enviará al Token, no se decodifica
-							(String) rs[2],//NOMBRES
-							(String) rs[3],//APELLIDOS
-							(String) rs[4],//DNI
-							(String) rs[5],//CORREO
-							(Integer) rs[6],//RANGO
-							(Boolean) rs[7] //ACTIVO
-					))
-					.collect(Collectors.toList());
-			
-			if(res.size() == 1)
-				return res.get(0);
-			else
-				return null;
-		}
-	}
-
-	@Override
-	public int updateUsuario(Usuario usuario, boolean newPass) throws SQLException, NamingException {
-		try(Connection conn = conexion.getConnection()){
-			try(PreparedStatement pst = conn.prepareStatement(
-					"UPDATE usuarios "+
-					"SET pass = ?, nombres = ?, apellidos = ?, dni = ?, correo = ?, id_rango = ?, activo = ? "+
-					"WHERE id_usuario = ? ")){
-				pst.setString(1, newPass?this.encodePass(usuario.getPass(), DaoUsuarioImpl.coded):usuario.getPass());
-				pst.setString(2, usuario.getNombres());
-				pst.setString(3, usuario.getApellidos());
-				pst.setString(4, usuario.getDni());
-				pst.setString(5, usuario.getCorreo());
-				pst.setInt(6, usuario.getRango());
-				pst.setBoolean(7, usuario.isActivo());
-				
-				pst.setString(8, usuario.getId());
-				
-				return pst.executeUpdate();
-			}
-		}
-	}
+	
 }

@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,10 +19,10 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.pe.azoth.beans.Cliente;
 import com.pe.azoth.beans.Estado;
-import com.pe.azoth.beans.Localidad;
 import com.pe.azoth.beans.Producto;
 
 public class DaoProductoImpl implements DaoProducto {
+	
 	
 	private Conexion conexion;
 	
@@ -38,18 +39,24 @@ public class DaoProductoImpl implements DaoProducto {
 			
 			return new QueryRunner()
 					.query(connection,
-							"SELECT * FROM productos ", 
+							"SELECT codigo,numero,descripcion,direccion,origen,destino,"
+							+ "cliente_envio,cliente_recepcion,id_estado, fec_creacion "
+							+ "FROM productos "
+							+ "WHERE id_estado != -1 "
+							+ "ORDER BY id_estado,codigo,fec_creacion ", 
 							new ArrayListHandler())
 					.stream()
 					.map( rs -> new Producto(
-							(Integer)rs[0],//ID
-							(String)rs[1],//CODIGO
+							(String)rs[0],//CODIGO
+							(Integer)rs[1],//NUMERO
 							(String)rs[2],//DESCRIPCION
-							new Localidad ((Integer)rs[3]),//ORIGEN
-							new Localidad ((Integer)rs[4]),//DESTINO
-							new Cliente ((Integer)rs[5]),//CLIENTE ENVIO
-							new Cliente ((Integer)rs[6]),//CLIENTE RECEPCION
-							new Estado ((Integer)rs[7])//Estado
+							(String)rs[3],//DIRECCION
+							(String)rs[4],//ORIGEN
+							(String)rs[5],//DESTINO
+							new Cliente ((Integer)rs[6]),//CLIENTE ENVIO
+							new Cliente ((Integer)rs[7]),//CLIENTE RECEPCION
+							new Estado ((Integer)rs[8]),//Estado,
+							(Timestamp)rs[9] //FECHA CREACION
 							))
 					.collect(Collectors.toList());
 		}
@@ -63,17 +70,26 @@ public class DaoProductoImpl implements DaoProducto {
 	public List<Producto> listProductos(String codigo)  throws SQLException, NamingException{
 		try(Connection connection = this.conexion.getConnection()){
 			return new QueryRunner()
-					.query(connection, "SELECT * FROM productos WHERE codigo = ? ", new ArrayListHandler(),codigo)
+					.query(connection, 
+							"SELECT codigo,numero,descripcion,direccion,origen,"
+							+ "destino,cliente_envio,cliente_recepcion,id_estado,fec_creacion "
+							+ "FROM productos "
+							+ "WHERE codigo = ? AND id_estado != -1 "
+							+ "ORDER BY id_estado, codigo, fec_creacion ", 
+							new ArrayListHandler(),
+							codigo)
 					.stream()
 					.map( rs -> new Producto(
-							(Integer)rs[0],//ID
-							(String)rs[1],//CODIGO
+							(String)rs[0],//CODIGO
+							(Integer)rs[1],//NUMERO
 							(String)rs[2],//DESCRIPCION
-							new Localidad ((Integer)rs[3]),//ORIGEN
-							new Localidad ((Integer)rs[4]),//DESTINO
-							new Cliente ((Integer)rs[5]),//CLIENTE ENVIO
-							new Cliente ((Integer)rs[6]),//CLIENTE RECEPCION
-							new Estado ((Integer)rs[7])//Estado
+							(String)rs[3],//DIRECCION
+							(String)rs[4],//ORIGEN
+							(String)rs[5],//DESTINO
+							new Cliente ((Integer)rs[6]),//CLIENTE ENVIO
+							new Cliente ((Integer)rs[7]),//CLIENTE RECEPCION
+							new Estado ((Integer)rs[8]),//Estado,
+							(Timestamp)rs[9] //FECHA CREACION
 							))
 					.collect(Collectors.toList());
 			
@@ -101,18 +117,24 @@ public class DaoProductoImpl implements DaoProducto {
 
 				return new QueryRunner()
 						.query(connection,
-								"SELECT * FROM productos WHERE CONCAT(codigo,'-',id_producto) IN " + sql , 
+								"SELECT codigo,numero,descripcion,direccion,origen,destino,cliente_envio,"
+								+ "cliente_recepcion,id_estado, fec_creacion "
+								+ "FROM productos "
+								+ "WHERE CONCAT(codigo,'-',numero) IN " + sql 
+								+ "ORDER BY id_estado,codigo,fec_creacion ", 
 								new ArrayListHandler())
 						.stream()
 						.map( rs -> new Producto(
-								(Integer)rs[0],//ID
-								(String)rs[1],//CODIGO
+								(String)rs[0],//CODIGO
+								(Integer)rs[1],//NUMERO
 								(String)rs[2],//DESCRIPCION
-								new Localidad ((Integer)rs[3]),//ORIGEN
-								new Localidad ((Integer)rs[4]),//DESTINO
-								new Cliente ((Integer)rs[5]),//CLIENTE ENVIO
-								new Cliente ((Integer)rs[6]),//CLIENTE RECEPCION
-								new Estado ((Integer)rs[7])//Estado
+								(String)rs[3],//DIRECCION
+								(String)rs[4],//ORIGEN
+								(String)rs[5],//DESTINO
+								new Cliente ((Integer)rs[6]),//CLIENTE ENVIO
+								new Cliente ((Integer)rs[7]),//CLIENTE RECEPCION
+								new Estado ((Integer)rs[8]),//Estado,
+								(Timestamp)rs[9] //FECHA CREACION
 								))
 						.collect(Collectors.toList());
 			}
@@ -122,21 +144,29 @@ public class DaoProductoImpl implements DaoProducto {
 	 * @see com.pe.azoth.dao.DaoProducto#getProducto(java.lang.Integer)
 	 */
 	@Override
-	public Producto getProducto(Integer id, String codigoProducto) throws SQLException, NamingException{
+	public Producto getProducto(Integer numero, String codigo) throws SQLException, NamingException{
+		
 		try(Connection connection = this.conexion.getConnection()){
 			List<Producto> temp = new QueryRunner()
-					.query(connection,"SELECT * FROM productos WHERE id_producto = ? AND codigo = ?", 
-						new ArrayListHandler(),id,codigoProducto)
+					.query(connection,
+							"SELECT codigo,numero,descripcion,direccion,origen,destino,cliente_envio,"
+							+ "cliente_recepcion,id_estado, fec_creacion FROM productos "
+							+ "WHERE id_estado != -1 AND codigo = ? AND numero = ? "
+							+ "ORDER BY id_estado,codigo,fec_creacion ", 
+						new ArrayListHandler(),
+						codigo,numero)
 					.stream()
 					.map( rs -> new Producto(
-							(Integer)rs[0],//ID
-							(String)rs[1],//CODIGO
+							(String)rs[0],//CODIGO
+							(Integer)rs[1],//NUMERO
 							(String)rs[2],//DESCRIPCION
-							new Localidad ((Integer)rs[3]),//ORIGEN
-							new Localidad ((Integer)rs[4]),//DESTINO
-							new Cliente ((Integer)rs[5]),//CLIENTE ENVIO
-							new Cliente ((Integer)rs[6]),//CLIENTE RECEPCION
-							new Estado ((Integer)rs[7])//Estado
+							(String)rs[3],//DIRECCION
+							(String)rs[4],//ORIGEN
+							(String)rs[5],//DESTINO
+							new Cliente ((Integer)rs[6]),//CLIENTE ENVIO
+							new Cliente ((Integer)rs[7]),//CLIENTE RECEPCION
+							new Estado ((Integer)rs[8]),//Estado,
+							(Timestamp)rs[9] //FECHA CREACION
 							))
 					.collect(Collectors.toList());
 			if(temp.size() == 1)
@@ -152,18 +182,26 @@ public class DaoProductoImpl implements DaoProducto {
 	@Override
 	public int insertProducto(Producto producto, Connection connection) throws SQLException{
 		try(PreparedStatement pst = connection.prepareStatement(
-				"INSERT INTO productos (codigo,descripcion,origen,destino,cliente_envio,cliente_recepcion,id_estado,id_producto) " +
-				"values (?,?,?,?,?,?,?,?) ")){
+				"INSERT INTO productos" + 
+				"(numero,codigo,descripcion, direccion,origen,destino,"
+				+ "cliente_envio,cliente_recepcion,id_estado) " + 
+				"SELECT ( IF(MAX(numero) IS NULL,0,MAX(numero))+1 ), ?,?,?,?,?,?,?,? " + 
+				"	FROM productos WHERE codigo = ? ;")){ 
+			
 			pst.setString(1, producto.getCodigo());
 			pst.setString(2, producto.getDescripcion());
-			pst.setInt(3, producto.getOrigen().getId());
-			pst.setInt(4, producto.getDestino().getId());
+			pst.setString(3, producto.getDireccion());
+			
+			pst.setString(3, producto.getOrigen());
+			pst.setString(4, producto.getDestino());
+			
 			pst.setInt(5, producto.getEnvio().getId());
 			pst.setInt(6, producto.getRecepcion().getId());
 			pst.setInt(7, producto.getEstado().getId());
-			pst.setInt(8,producto.getId());
 			
-			return pst.executeUpdate();
+			pst.setString(8,producto.getCodigo());
+			
+			return getNextIdProducto(producto.getCodigo(),connection)-1;
 		}
 	}
 	/* (non-Javadoc)
@@ -172,7 +210,7 @@ public class DaoProductoImpl implements DaoProducto {
 	@Override
 	public int insertProducto(Producto producto) throws SQLException, NamingException {
 		try(Connection connection = this.conexion.getConnection()){
-			producto.setId(this.getNextIdProducto(producto.getCodigo()));
+			//producto.setId(this.getNextIdProducto(producto.getCodigo()));
 			return this.insertProducto(producto,connection);
 		}
 	}
@@ -183,17 +221,20 @@ public class DaoProductoImpl implements DaoProducto {
 	@Override
 	public int updateProducto(Producto producto, Connection connection) throws SQLException {
 		try(PreparedStatement pst = connection.prepareStatement(
-				"UPDATE productos SET descripcion = ?, origen = ?, destino = ?, cliente_envio = ?, cliente_recepcion = ?, id_estado = ? "+
-				"WHERE codigo = ? AND id_producto = ? ")){
+				"UPDATE productos "
+				+ "SET descripcion = ?,direccion = ?,origen = ?,destino = ?,cliente_envio = ?,"
+				+ "cliente_recepcion = ?,id_estado = ? "
+				+ "WHERE codigo = ? AND numero = ?;")){
 			
 			pst.setString(1, producto.getDescripcion());
-			pst.setInt(2, producto.getOrigen().getId());
-			pst.setInt(3, producto.getDestino().getId());
-			pst.setInt(4, producto.getEnvio().getId());
-			pst.setInt(5, producto.getRecepcion().getId());
-			pst.setInt(6, producto.getEstado().getId());
-			pst.setString(7, producto.getCodigo());
-			pst.setInt(8,producto.getId());
+			pst.setString(2, producto.getDireccion());
+			pst.setString(3, producto.getOrigen());
+			pst.setString(4, producto.getDestino());
+			pst.setInt(5, producto.getEnvio().getId());
+			pst.setInt(6, producto.getRecepcion().getId());
+			pst.setInt(7, producto.getEstado().getId());
+			pst.setString(8, producto.getCodigo());
+			pst.setInt(9,producto.getNumero());
 			
 			return pst.executeUpdate();
 		}
@@ -224,7 +265,7 @@ public class DaoProductoImpl implements DaoProducto {
 		}
 	}
 	
-	public int getNextIdProducto(String codigo, Connection connection) throws SQLException, NamingException{
+	public int getNextIdProducto(String codigo, Connection connection) throws SQLException{
 		try(PreparedStatement pst = connection.prepareStatement("select IFNULL(MAX(id_producto), 0) + 1  "
 				+ "from courier_tracker.productos where codigo = ?")){
 			pst.setString(1, codigo);

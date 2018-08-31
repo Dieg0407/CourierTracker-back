@@ -53,7 +53,6 @@ public class AuthenticationService {
 				
 				node.put("rango",usr.getRango());
 				
-				
 				return Response.status(200)
 					      .entity(mapper.writeValueAsString(node))
 					      .build();

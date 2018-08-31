@@ -93,7 +93,7 @@ public class JWTManager{
 			
 			Usuario usr = mapper.readValue(usrJson , Usuario.class);
 			
-			if(dao.isActivo(usr.getId()))
+			if(dao.isActivo(usr.getCorreo()))
 				return usr;
 			else
 				return null;

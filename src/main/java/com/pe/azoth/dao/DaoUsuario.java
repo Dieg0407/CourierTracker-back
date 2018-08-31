@@ -13,13 +13,13 @@ public interface DaoUsuario {
 	
 	List<Usuario> listUsuarios(String not_consider) throws SQLException, NamingException, NullPointerException;
 
-	Usuario getUsuario(String id, String pass) throws SQLException, NamingException, NullPointerException;
+	Usuario getUsuario(String correo, String pass) throws SQLException, NamingException, NullPointerException;
 	
-	Usuario getUsuario(String id) throws SQLException, NamingException, NullPointerException;
+	Usuario getUsuario(String correo) throws SQLException, NamingException, NullPointerException;
 
 	void insertUsuario(Usuario usuario) throws SQLException, NamingException, NullPointerException;
 
-	boolean isActivo(String idUsuario) throws SQLException, NamingException;
+	boolean isActivo(String correo) throws SQLException, NamingException;
 	
 	int updateUsuario(Usuario usuario, boolean newPass) throws SQLException, NamingException;
 

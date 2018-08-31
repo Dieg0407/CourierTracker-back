@@ -31,16 +31,17 @@ public class DaoClienteImpl implements DaoCliente {
 	public List<Cliente> listClientes() throws SQLException, NamingException{
 		try(Connection connection = this.conexion.getConnection()){
 			return new QueryRunner()
-					.query(connection, "SELECT * FROM clientes",new ArrayListHandler())
+					.query(connection, 
+							"SELECT id_cliente,nombres,apellidos,dni,celular,correo "
+							+ "FROM clientes",new ArrayListHandler())
 					.stream()
 					.map( rs -> new Cliente(
 							(Integer)rs[0],//ID
 							(String)rs[1],//NOMBRES
 							(String)rs[2],//APELLIDOS
 							(String)rs[3],//DNI
-							(String)rs[4],//DIRECCION
-							(String)rs[5],//CELULAR
-							(String)rs[6]//CORREO
+							(String)rs[4],//CELULAR
+							(String)rs[5]//CORREO
 							))
 					.collect(Collectors.toList());
 		}
@@ -53,16 +54,17 @@ public class DaoClienteImpl implements DaoCliente {
 	public List<Cliente> listClientes(String dni) throws SQLException, NamingException {
 		try(Connection connection = this.conexion.getConnection()){
 			return new QueryRunner()
-					.query(connection, "SELECT * FROM clientes WHERE dni = ? ",new ArrayListHandler(),dni)
+					.query(connection, 
+							"SELECT id_cliente,nombres,apellidos,dni,celular,correo "
+							+ "FROM clientes WHERE dni = ? ",new ArrayListHandler(),dni)
 					.stream()
 					.map( rs -> new Cliente(
 							(Integer)rs[0],//ID
 							(String)rs[1],//NOMBRES
 							(String)rs[2],//APELLIDOS
 							(String)rs[3],//DNI
-							(String)rs[4],//DIRECCION
-							(String)rs[5],//CELULAR
-							(String)rs[6]//CORREO
+							(String)rs[4],//CELULAR
+							(String)rs[5]//CORREO
 							))
 					.collect(Collectors.toList());
 		}
@@ -75,40 +77,85 @@ public class DaoClienteImpl implements DaoCliente {
 	public Cliente getCliente(Integer idCliente) throws SQLException, NamingException{
 		try(Connection connection = this.conexion.getConnection()){
 			List<Cliente> lista = new QueryRunner()
-					.query(connection, "SELECT * FROM clientes WHERE id_cliente = ? ",new ArrayListHandler(),idCliente)
+					.query(connection, 
+							"SELECT id_cliente,nombres,apellidos,dni,celular,correo "
+							+ "FROM clientes WHERE id_cliente = ? ",new ArrayListHandler(),idCliente)
 					.stream()
 					.map( rs -> new Cliente(
 							(Integer)rs[0],//ID
 							(String)rs[1],//NOMBRES
 							(String)rs[2],//APELLIDOS
 							(String)rs[3],//DNI
-							(String)rs[4],//DIRECCION
-							(String)rs[5],//CELULAR
-							(String)rs[6]//CORREO
+							(String)rs[4],//CELULAR
+							(String)rs[5]//CORREO
 							))
 					.collect(Collectors.toList());
 			return (lista.size() == 1)?lista.get(0):null;
 		}
 	}
+
+	@Override
+	public Cliente getCliente(Integer idCliente, Connection connection) throws SQLException{
+		
+		List<Cliente> lista = new QueryRunner()
+				.query(connection, 
+						"SELECT id_cliente,nombres,apellidos,dni,celular,correo "
+						+ "FROM clientes WHERE id_cliente = ? ",new ArrayListHandler(),idCliente)
+				.stream()
+				.map( rs -> new Cliente(
+						(Integer)rs[0],//ID
+						(String)rs[1],//NOMBRES
+						(String)rs[2],//APELLIDOS
+						(String)rs[3],//DNI
+						(String)rs[4],//CELULAR
+						(String)rs[5]//CORREO
+						))
+				.collect(Collectors.toList());
+		return (lista.size() == 1)?lista.get(0):null;
+		
+	}
+
 	@Override
 	public Cliente getCliente(String dni) throws SQLException, NamingException {
 		try(Connection connection = this.conexion.getConnection()){
 			List<Cliente> lista = new QueryRunner()
-					.query(connection, "SELECT * FROM clientes WHERE dni = ? ",new ArrayListHandler(),dni)
+					.query(connection, 
+							"SELECT id_cliente,nombres,apellidos,dni,celular,correo "
+							+ "FROM clientes WHERE dni = ? ",new ArrayListHandler(),dni)
 					.stream()
 					.map( rs -> new Cliente(
 							(Integer)rs[0],//ID
 							(String)rs[1],//NOMBRES
 							(String)rs[2],//APELLIDOS
 							(String)rs[3],//DNI
-							(String)rs[4],//DIRECCION
-							(String)rs[5],//CELULAR
-							(String)rs[6]//CORREO
+							(String)rs[4],//CELULAR
+							(String)rs[5]//CORREO
 							))
 					.collect(Collectors.toList());
 			return (lista.size() == 1)?lista.get(0):null;
 		}
 	}
+
+	@Override
+	public Cliente getCliente(String dni, Connection connection) throws SQLException {
+		List<Cliente> lista = new QueryRunner()
+				.query(connection, 
+						"SELECT id_cliente,nombres,apellidos,dni,celular,correo "
+					+ "FROM clientes WHERE dni = ? ",new ArrayListHandler(),dni)
+				.stream()
+				.map( rs -> new Cliente(
+						(Integer)rs[0],//ID
+						(String)rs[1],//NOMBRES
+						(String)rs[2],//APELLIDOS
+						(String)rs[3],//DNI
+						(String)rs[4],//CELULAR
+						(String)rs[5]//CORREO
+						))
+				.collect(Collectors.toList());
+		return (lista.size() == 1)?lista.get(0):null;
+	}
+
+
 	
 	/* (non-Javadoc)
 	 * @see com.pe.azoth.dao.DaoCliente#insertCliente(com.pe.azoth.beans.Cliente, java.sql.Connection)
@@ -116,18 +163,19 @@ public class DaoClienteImpl implements DaoCliente {
 	@Override
 	public int insertCliente(Cliente cliente, Connection connection) throws SQLException, NamingException{
 		try(PreparedStatement pst = connection.prepareStatement(
-				"INSERT INTO clientes "+
-				"(nombres,apellidos,dni,direccion,celular,correo) "+
-				"VALUES (?,?,?,?,?,?) ")){
+				"INSERT INTO clientes "
+				+ "(nombres,apellidos,dni,celular,correo) "
+				+ "VALUES (?,?,?,?,?)")){
 			
 			pst.setString(1, cliente.getNombres());
 			pst.setString(2, cliente.getApellidos());
 			pst.setString(3, cliente.getDni());
-			pst.setString(4, cliente.getDireccion());
-			pst.setString(5, cliente.getCelular());
-			pst.setString(6, cliente.getCorreo());
+			pst.setString(4, cliente.getCelular());
+			pst.setString(5, cliente.getCorreo());
 			
-			return pst.executeUpdate();
+			pst.executeUpdate();
+
+			return this.getCliente(cliente.getDni()).getId();
 		}
 	}
 	
@@ -148,15 +196,14 @@ public class DaoClienteImpl implements DaoCliente {
 	public int updateCliente(Cliente cliente, Connection connection) throws SQLException, NamingException{
 		try(PreparedStatement pst = connection.prepareStatement(
 				"UPDATE clientes "+
-				"SET nombres = ?, apellidos = ?, dni = ?, direccion = ?, celular = ?, correo = ? "+
+				"SET nombres = ?, apellidos = ?, dni = ?, celular = ?, correo = ? "+
 				"WHERE id_cliente = ? ")){
 			pst.setString(1, cliente.getNombres());
 			pst.setString(2, cliente.getApellidos());
 			pst.setString(3, cliente.getDni());
-			pst.setString(4, cliente.getDireccion());
-			pst.setString(5, cliente.getCelular());
-			pst.setString(6, cliente.getCorreo());
-			pst.setInt(7, cliente.getId());
+			pst.setString(4, cliente.getCelular());
+			pst.setString(5, cliente.getCorreo());
+			pst.setInt(6, cliente.getId());
 			
 			return pst.executeUpdate();
 		}

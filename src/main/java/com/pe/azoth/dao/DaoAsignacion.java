@@ -18,14 +18,14 @@ public interface DaoAsignacion {
 	/* (non-Javadoc)
 	 * @see com.pe.azoth.dao.DaoAsignacion#listAsignaciones(java.lang.String)
 	 */
-	List<Asignacion> listAsignaciones(String idUsuario) throws SQLException, NamingException;
+	List<Asignacion> listAsignaciones(String correoUsuario) throws SQLException, NamingException;
 
 	/* (non-Javadoc)
 	 * @see com.pe.azoth.dao.DaoAsignacion#listAsignaciones(java.lang.Integer)
 	 */
-	List<Asignacion> listAsignaciones(Integer idProducto,String codigoProducto) throws SQLException, NamingException;
+	List<Asignacion> listAsignaciones(Integer nroProducto, String codigoProducto) throws SQLException, NamingException;
 
-	Asignacion getAsignacion(Integer idProducto, String codigoProducto, String idUsuario) throws SQLException, NamingException;
+	Asignacion getAsignacion(Integer nroProducto, String codigoProducto, String correoUsuario) throws SQLException, NamingException;
 
 	/* (non-Javadoc)
 	 * @see com.pe.azoth.dao.DaoAsignacion#insertAsignacion(com.pe.azoth.beans.Asignacion, java.sql.Connection)

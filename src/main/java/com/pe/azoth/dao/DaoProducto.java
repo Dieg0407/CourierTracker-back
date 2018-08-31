@@ -17,9 +17,18 @@ public interface DaoProducto {
 	 * @throws NamingException
 	 */
 	List<Producto> listProductos() throws SQLException, NamingException;
-
+	
 	/**
-	 * Lista los productos segun su ID y CODIGO DE LA SIGUIENTE FORMA CODIGO-ID
+	 * Se obtiene un producto por el codigo de su
+	 * @param codigo
+	 * @return
+	 * @throws SQLException
+	 * @throws NamingException
+	 */
+	List<Producto> listProductos(String codigo) throws SQLException, NamingException;
+	
+	/**
+	 * Lista los productos segun su NUMERO y CODIGO DE LA SIGUIENTE FORMA CODIGO-NUMERO
 	 * @param CODIGO-ID concatenados
 	 * @return
 	 * @throws SQLException
@@ -27,24 +36,19 @@ public interface DaoProducto {
 	 */
 	List<Producto> listProductos(String...strings ) throws SQLException, NamingException;
 	
+	
+
 	/**
-	 * Obtienes un producto por su ID unico
-	 * @param id
+	 * Obtienes un producto por su numero y codigo
+	 * @param numero
+	 * @param codigo 
 	 * @return
 	 * @throws SQLException
 	 * @throws NamingException
 	 */
-	Producto getProducto(Integer id, String codigo) throws SQLException, NamingException;
+	Producto getProducto(Integer numero, String codigo) throws SQLException, NamingException;
 
-	/**
-	 * Se obtiene un producto por el codigo de empresa
-	 * @param codigo
-	 * @return
-	 * @throws SQLException
-	 * @throws NamingException
-	 */
-	List<Producto> listProductos(String codigo) throws SQLException, NamingException;
-
+	
 	int insertProducto(Producto producto, Connection connection) throws SQLException;
 
 	int insertProducto(Producto producto) throws SQLException, NamingException;
