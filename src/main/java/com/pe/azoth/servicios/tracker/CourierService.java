@@ -144,8 +144,10 @@ public class CourierService {
 		@FormParam("codigo_numero") @DefaultValue("") String codigo_numero) throws JsonProcessingException{
 
 		try{
+			String[] str = new String[1];
+			str[0] = codigo_numero;
 			DaoProducto daoProducto = new DaoProductoImpl();
-			List<Producto> temp = daoProducto.listProductos(codigo_numero);
+			List<Producto> temp = daoProducto.listProductos(str);
 			if(temp.size() == 1 ) 
 				return temp.get(0);
 			else 
