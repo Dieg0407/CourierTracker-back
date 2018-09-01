@@ -152,9 +152,9 @@ public class CourierService {
 				return temp.get(0);
 			else 
 				throw this.exception(Response.Status.NOT_FOUND, 
-							"No se ha encontrado un producto con el codigo-numero : " + codigo_numero);
+							"No se encontro codigo-numero : " + codigo_numero);
 		}
-		catch(Exception e){
+		catch(IOException | SQLException | NamingException e){
 			e.printStackTrace();
 			throw this.exception(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
 		}
