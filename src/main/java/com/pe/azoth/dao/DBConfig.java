@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pe.azoth.beans.DataBaseInfo;
 
-class DBConfig {
+public class DBConfig {
 	private DataBaseInfo data;
 	
 	public DBConfig() throws JsonParseException, JsonMappingException, IOException {

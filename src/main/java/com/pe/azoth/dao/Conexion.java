@@ -23,6 +23,9 @@ public class Conexion {
 			Conexion.config = new DBConfig().getData();
 	}
 	
+	public DataBaseInfo getConfig(){
+		return config;
+	}
 	public synchronized void reload() throws  JsonParseException, JsonMappingException, IOException {
 		Conexion.config = new DBConfig().getData();
 	}

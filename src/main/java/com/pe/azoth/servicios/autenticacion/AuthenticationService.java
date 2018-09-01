@@ -25,6 +25,8 @@ import com.pe.azoth.beans.Usuario;
 import com.pe.azoth.modelo.JWTManager;
 
 import com.pe.azoth.dao.Conexion;
+
+import com.pe.azoth.beans.DataBaseInfo;
 import java.sql.Connection;
 
 @Path("/")
@@ -37,6 +39,23 @@ public class AuthenticationService {
 	public Response probarConexion(){
 		try(Connection conn = new Conexion().getConnection()){
 			return Response.ok().entity("{\"message\":\"conexion establecida\"}").build();
+		}
+		catch(Exception e){
+			throw new WebApplicationException(
+						Response.status(Status.UNAUTHORIZED)
+						.entity("{\"message\":\""+e.getMessage()+"\"}")
+						.type(MediaType.APPLICATION_JSON)
+						.build()
+			);
+		}
+	}
+
+	@GET
+	@Path("/dbConfig")
+	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	public DataBaseInfo getDatosConexion(){
+		try(Connection conn = new Conexion().getConnection()){
+			return new Conexion().getConfig();
 		}
 		catch(Exception e){
 			throw new WebApplicationException(
