@@ -137,7 +137,28 @@ public class CourierService {
 			);
 		}
 	}
-	
+	@POST
+	@Path("/getProductoCliente")
+	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	public Producto getProductoCliente(
+		@FormParam("codigo_numero") @DefaultValue("") String codigo_numero) throws JsonProcessingException{
+
+		try{
+			DaoProducto daoProducto = new DaoProductoImpl();
+			List<Producto> temp = daoProducto.listProductos(codigo_numero);
+			if(temp.size() == 1 ) 
+				return temp.get(0);
+			else 
+				throw this.exception(Response.Status.NOT_FOUND, 
+							"No se ha encontrado un producto con el codigo-numero : " + codigo_numero);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			throw this.exception(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
+		}
+
+	}
+
 	@POST
 	@Path("/getProducto")
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
