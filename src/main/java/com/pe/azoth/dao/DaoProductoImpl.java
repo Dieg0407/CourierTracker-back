@@ -112,7 +112,7 @@ public class DaoProductoImpl implements DaoProducto {
 				for(String x : codigos) {
 					sql += ("'"+x+"'" +",");
 				}
-				sql = sql.substring(0,sql.length()-1)+")";
+				sql = sql.substring(0,sql.length()-1)+") ";
 				
 
 				return new QueryRunner()
