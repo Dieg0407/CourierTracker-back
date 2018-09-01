@@ -147,6 +147,13 @@ public class DaoProductoImpl implements DaoProducto {
 	public Producto getProducto(Integer numero, String codigo) throws SQLException, NamingException{
 		
 		try(Connection connection = this.conexion.getConnection()){
+			return getProducto(numero,codigo,connection);
+		}
+	}
+
+	@Override
+	public Producto getProducto(Integer numero, String codigo, Connection connection) throws SQLException, NamingException{
+		
 			List<Producto> temp = new QueryRunner()
 					.query(connection,
 							"SELECT codigo,numero,descripcion,direccion,origen,destino,cliente_envio,"
@@ -173,7 +180,7 @@ public class DaoProductoImpl implements DaoProducto {
 				return temp.get(0);
 			else
 				return null;
-		}
+		
 	}
 	
 	/* (non-Javadoc)

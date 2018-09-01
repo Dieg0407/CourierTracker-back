@@ -48,6 +48,8 @@ public interface DaoProducto {
 	 */
 	Producto getProducto(Integer numero, String codigo) throws SQLException, NamingException;
 
+	Producto getProducto(Integer numero, String codigo, Connection connection) throws SQLException, NamingException;
+
 	
 	int insertProducto(Producto producto, Connection connection) throws SQLException;
 

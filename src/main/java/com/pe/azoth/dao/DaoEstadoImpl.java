@@ -50,6 +50,13 @@ public class DaoEstadoImpl implements DaoEstado {
 	public Estado getEstado (int id) throws SQLException, NamingException{
 		
 		try(Connection connection = this.conexion.getConnection()){
+			return getEstado(id,connection);
+		}
+		
+	}
+	@Override
+	public Estado getEstado (int id, Connection connection) throws SQLException, NamingException{
+		
 			
 			List<Estado > lista = new QueryRunner()
 					.query(connection,"SELECT * FROM estados WHERE id_estado = ? ", new ArrayListHandler(),id)
@@ -61,7 +68,7 @@ public class DaoEstadoImpl implements DaoEstado {
 					.collect(Collectors.toList()); 
 			
 			return (lista.size()==1?lista.get(0):null);
-		}
+		
 		
 	}
 }

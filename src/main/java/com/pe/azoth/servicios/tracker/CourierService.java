@@ -144,14 +144,23 @@ public class CourierService {
 	public Producto getProductoCliente(
 		String jsonObject) throws JsonProcessingException{
 		ObjectMapper mapper = new ObjectMapper();
-		try{
+		try(Connection connection = new Conexion().getConnection()){
+
 			String[] str = mapper.readTree(jsonObject).get("codigo_numero").textValue().split("-");
 			String codigo = str[0];
 			int numero = Integer.valueOf(str[1]);
 			DaoProducto daoProducto = new DaoProductoImpl();
-			Producto temp = daoProducto.getProducto(numero,codigo);
-			if(temp != null) 
+			DaoCliente daoCliente = new DaoClienteImpl();
+			DaoEstado daoEstado = new DaoEstadoImpl();
+
+			Producto temp = daoProducto.getProducto(numero,codigo,connection);
+
+			if(temp != null){
+				temp.setEnvio(daoCliente.getCliente(temp.getEnvio().getId(),connection));
+				temp.setRecepcion(daoCliente.getCliente(temp.getRecepcion().getId(),connection));
+				temp.setEstado(daoEstado.getEstado(temp.getEstado().getId(),connection));
 				return temp;
+			} 
 			else 
 				throw this.exception(Response.Status.NOT_FOUND, 
 							"No se encontro codigo-numero : " + codigo+"-"+numero);

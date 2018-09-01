@@ -1,6 +1,8 @@
 package com.pe.azoth.dao;
 
 import java.sql.SQLException;
+import java.sql.Connection;
+
 import java.util.List;
 
 import javax.naming.NamingException;
@@ -13,4 +15,5 @@ public interface DaoEstado {
 
 	Estado getEstado(int id) throws SQLException, NamingException;
 
+	Estado getEstado(int id, Connection connection) throws SQLException, NamingException;
 }
