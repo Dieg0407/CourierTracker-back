@@ -254,7 +254,7 @@ public class DaoProductoImpl implements DaoProducto {
 	public int getNextIdProducto(String codigo) throws SQLException, NamingException{
 		try(Connection connection = conexion.getConnection()){
 			try(PreparedStatement pst = connection.prepareStatement("select IFNULL(MAX(numero), 0) + 1  "
-					+ "from courier_tracker.productos where codigo = ?")){
+					+ "from productos where codigo = ?")){
 				pst.setString(1, codigo);
 				
 				try(ResultSet rs = pst.executeQuery()){
@@ -269,7 +269,7 @@ public class DaoProductoImpl implements DaoProducto {
 	
 	public int getNextIdProducto(String codigo, Connection connection) throws SQLException{
 		try(PreparedStatement pst = connection.prepareStatement("select IFNULL(MAX(numero), 0) + 1  "
-				+ "from courier_tracker.productos where codigo = ?")){
+				+ "from productos where codigo = ?")){
 			pst.setString(1, codigo);
 			
 			try(ResultSet rs = pst.executeQuery()){

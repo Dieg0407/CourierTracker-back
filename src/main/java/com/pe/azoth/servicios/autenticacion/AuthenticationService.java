@@ -54,7 +54,7 @@ public class AuthenticationService {
 	@Path("/dbConfig")
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 	public DataBaseInfo getDatosConexion(){
-		try(Connection conn = new Conexion().getConnection()){
+		try{
 			return new Conexion().getConfig();
 		}
 		catch(Exception e){
