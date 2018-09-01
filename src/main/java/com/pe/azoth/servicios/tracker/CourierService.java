@@ -139,12 +139,13 @@ public class CourierService {
 	}
 	@POST
 	@Path("/getProductoCliente")
+	@Consumes(MediaType.APPLICATION_JSON + ";charset=utf-8")
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 	public Producto getProductoCliente(
-		@FormParam("codigo_numero") @DefaultValue("") String codigo_numero) throws JsonProcessingException{
-
+		String jsonObject) throws JsonProcessingException{
+		ObjectMapper mapper = new ObjectMapper();
 		try{
-			String[] str = codigo_numero.split("-");
+			String[] str = mapper.readTree(jsonObject).get("codigo_numero").textValue().split("-");
 			String codigo = str[0];
 			int numero = Integer.valueOf(str[1]);
 			DaoProducto daoProducto = new DaoProductoImpl();
@@ -153,7 +154,7 @@ public class CourierService {
 				return temp;
 			else 
 				throw this.exception(Response.Status.NOT_FOUND, 
-							"No se encontro codigo-numero : " + codigo_numero);
+							"No se encontro codigo-numero : " + codigo+"-"+numero);
 		}
 		catch(IOException | SQLException | NamingException e){
 			e.printStackTrace();
