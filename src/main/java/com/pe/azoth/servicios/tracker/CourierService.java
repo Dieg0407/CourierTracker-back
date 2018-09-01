@@ -144,12 +144,13 @@ public class CourierService {
 		@FormParam("codigo_numero") @DefaultValue("") String codigo_numero) throws JsonProcessingException{
 
 		try{
-			String[] str = new String[1];
-			str[0] = codigo_numero;
+			String[] str = codigo_numero.split("-");
+			String codigo = str[0];
+			int numero = Integer.valueOf(str[1]);
 			DaoProducto daoProducto = new DaoProductoImpl();
-			List<Producto> temp = daoProducto.listProductos(str);
-			if(temp.size() == 1 ) 
-				return temp.get(0);
+			Producto temp = daoProducto.getProducto(numero,codigo);
+			if(temp != null) 
+				return temp;
 			else 
 				throw this.exception(Response.Status.NOT_FOUND, 
 							"No se encontro codigo-numero : " + codigo_numero);
