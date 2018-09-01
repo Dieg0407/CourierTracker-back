@@ -4,7 +4,9 @@ package com.pe.azoth.servicios.tracker;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.naming.NamingException;
@@ -22,6 +24,7 @@ import javax.ws.rs.core.Response;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.pe.azoth.beans.Asignacion;
 import com.pe.azoth.beans.Cliente;
@@ -248,9 +251,10 @@ public class CourierService {
 		Connection connection = null;
 		try{
 			connection = new Conexion().getConnection();
+			
 			connection.setAutoCommit(false);
-
-			Cliente cliente = daoCliente.getCliente(producto.getEnvio().getDni());
+			
+			Cliente cliente = daoCliente.getCliente(producto.getEnvio().getDni(), connection);
 
 			if(cliente == null)
 				producto.getEnvio().setId( 
@@ -258,17 +262,17 @@ public class CourierService {
 				);
 			else{
 				producto.getEnvio().setId(cliente.getId());
-				daoCliente.updateCliente(producto.getEnvio());
+				daoCliente.updateCliente(producto.getEnvio(), connection);
 			}
 
-			cliente = daoCliente.getCliente(producto.getRecepcion().getDni());
+			cliente = daoCliente.getCliente(producto.getRecepcion().getDni(), connection);
 			if(daoCliente.getCliente(producto.getRecepcion().getDni()) == null)
 				producto.getRecepcion().setId( 
 					daoCliente.insertCliente(producto.getRecepcion(), connection)
 				);
 			else{
 				producto.getRecepcion().setId(cliente.getId());
-				daoCliente.updateCliente(producto.getRecepcion());
+				daoCliente.updateCliente(producto.getRecepcion(), connection);
 			}
 			
 			connection.commit();
@@ -280,7 +284,7 @@ public class CourierService {
 			return ret;
 		}
 		catch(SQLException e) {
-			try { connection.rollback(); } catch(Exception ex) {}
+			try { connection.rollback(); connection.close(); } catch(Exception ex) {}
 			throw e;
 		}
 	}
@@ -324,7 +328,7 @@ public class CourierService {
 			
 			connection.setAutoCommit(false);
 			
-			Cliente cliente = daoCliente.getCliente(producto.getEnvio().getDni());
+			Cliente cliente = daoCliente.getCliente(producto.getEnvio().getDni(), connection);
 
 			if(cliente == null)
 				producto.getEnvio().setId( 
@@ -332,28 +336,30 @@ public class CourierService {
 				);
 			else{
 				producto.getEnvio().setId(cliente.getId());
-				daoCliente.updateCliente(producto.getEnvio());
+				daoCliente.updateCliente(producto.getEnvio(), connection);
 			}
 
-			cliente = daoCliente.getCliente(producto.getRecepcion().getDni());
+			cliente = daoCliente.getCliente(producto.getRecepcion().getDni(), connection);
 			if(daoCliente.getCliente(producto.getRecepcion().getDni()) == null)
 				producto.getRecepcion().setId( 
 					daoCliente.insertCliente(producto.getRecepcion(), connection)
 				);
 			else{
 				producto.getRecepcion().setId(cliente.getId());
-				daoCliente.updateCliente(producto.getRecepcion());
+				daoCliente.updateCliente(producto.getRecepcion(), connection);
 			}
 			
+			connection.commit();
 			
 			int ret = daoProducto.insertProducto(producto, connection);
 			
+
 			connection.commit();
 			connection.close();
 			return ret;
 		}
 		catch(SQLException e) {
-			try { connection.rollback(); } catch(Exception ex) {}
+			try { connection.rollback(); connection.close();} catch(Exception ex) {}
 			throw e;
 		}
 	}
@@ -378,6 +384,79 @@ public class CourierService {
 				throw this.exception(Response.Status.UNAUTHORIZED, "ERROR DE AUTENTICACIÓN");
 		}
 		catch (IOException | SQLException | NamingException e) {
+			e.printStackTrace(System.err);
+			throw this.exception(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
+		}
+	}
+
+	@POST
+	@Path("/listUsuariosAsignacion")
+	@Consumes(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	public Response listUsuarios(
+			@HeaderParam("token") @DefaultValue("") String token,
+			String jsonObject) throws JsonProcessingException{
+		
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			String codigo = mapper.readTree(jsonObject).get("codigo").textValue();
+			int numero = mapper.readTree(jsonObject).get("numero").intValue();
+			
+			JWTManager jwtManager = new JWTManager();
+			if(jwtManager.parseJWT(token) != null) {
+				DaoUsuario daoUsuarios = new DaoUsuarioImpl();
+				DaoAsignacion daoAsignaciones = new DaoAsignacionImpl();
+				
+				Map<String,Usuario> mapa = 
+						daoUsuarios.listUsuarios(
+						"admin@local.ed" //NO SE PUEDE LISTAR EL USUARIO ADMINISTRADOR
+						)
+						.stream()
+						.filter(usr -> usr.getRango() == 2 || usr.getRango() == 3)
+						
+						.collect(
+							Collectors.toMap(Usuario::getCorreo, u -> u)
+						);
+				
+				List<String> usuariosAsignados = daoAsignaciones.listAsignaciones(numero, codigo)
+				.stream()
+				.map(a -> a.getCorreoUsuario())
+				.collect(Collectors.toList());
+				
+				
+				List<Usuario> asignados = new ArrayList<>();
+				List<Usuario> sinAsignar = new ArrayList<>();
+				
+				for(String correo : usuariosAsignados) {
+					if(mapa.get(correo) != null)
+						asignados.add(mapa.get(correo));
+					
+					mapa.remove(correo);
+				}
+				for(String key : mapa.keySet()) {
+					sinAsignar.add(mapa.get(key));
+				}
+				
+				ObjectNode response = mapper.createObjectNode();
+				ArrayNode arrA = mapper.valueToTree(asignados);
+				ArrayNode arrS = mapper.valueToTree(sinAsignar);
+				
+				if(asignados.size() != 0)
+					response.putArray("asignados").addAll(arrA);
+				else
+					response.putNull("asignados");
+				
+				if(sinAsignar.size() != 0)
+					response.putArray("sin_asignar").addAll(arrS);
+				else
+					response.putNull("sin_asignar");
+				
+				return Response.ok().entity(response).build();
+			}
+			else
+				throw this.exception(Response.Status.UNAUTHORIZED, "ERROR DE AUTENTICACIÓN");
+		}
+		catch (IOException | SQLException | NamingException  e) {
 			e.printStackTrace(System.err);
 			throw this.exception(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
 		}
@@ -539,6 +618,80 @@ public class CourierService {
 		
 	}
 	
+	@POST
+	@Path("/asignarUsuariosProducto")
+	@Consumes(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	public Response asignarUsuariosProducto(
+			@HeaderParam("token") @DefaultValue("") String token,
+			String jsonObject) throws JsonProcessingException {
+		
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			if(new JWTManager().parseJWT(token) != null) {
+				JsonNode raiz = mapper.readTree(jsonObject);
+				
+				JsonNode asignados = raiz.get("asignados");
+				JsonNode sinAsignar = raiz.get("sin_asignar");
+				
+				asignar(asignados,sinAsignar,mapper);
+				
+				return Response.ok().build();
+			}
+			else
+				throw this.exception(Response.Status.UNAUTHORIZED, "ERROR DE AUTENTICACIÓN");
+		}
+		catch(IOException | SQLException | NamingException  e) {
+			e.printStackTrace(System.err);
+			throw this.exception(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
+		}
+		
+	}
+	
+	private void asignar(JsonNode asignados, JsonNode sinAsignar, ObjectMapper mapper) throws SQLException, NamingException, IOException {
+		Connection connection = null;
+		try {
+			connection = new Conexion().getConnection();
+			
+			String codProducto = null;
+			int nroProducto = -1;
+			
+			DaoAsignacion daoAsignacion = new DaoAsignacionImpl();
+			if(asignados != null) {
+				for(JsonNode node : asignados) {
+					Asignacion temporal = mapper.treeToValue(node, Asignacion.class);
+					if(daoAsignacion.getAsignacion(temporal.getNroProducto(), temporal.getCodProducto(), temporal.getCorreoUsuario(), connection) == null)
+						daoAsignacion.insertAsignacion(temporal,connection);
+					
+					codProducto = temporal.getCodProducto();
+					nroProducto = temporal.getNroProducto();
+				}
+			}
+			
+			if(sinAsignar != null) {
+				for(JsonNode node : sinAsignar) {
+					Asignacion temporal = mapper.treeToValue(node, Asignacion.class);
+					if(daoAsignacion.getAsignacion(temporal.getNroProducto(), temporal.getCodProducto(), temporal.getCorreoUsuario(), connection) != null)
+						daoAsignacion.deleteAsignacion(temporal,connection);
+					
+					
+					codProducto = temporal.getCodProducto();
+					nroProducto = temporal.getNroProducto();
+				}
+			}
+			
+			if(codProducto != null) {
+				if(daoAsignacion.getAsignacion(nroProducto, codProducto, "admin@local.ed", connection) == null)
+					daoAsignacion.insertAsignacion(new Asignacion("admin@local.ed",codProducto,nroProducto,0));
+			}
+			
+			connection.close();
+		}
+		catch(SQLException e) {
+			try { connection.close(); } catch(Exception ex) {}
+			throw e;
+		}
+	}
 	
 	private WebApplicationException exception(Response.Status status, String mensaje) throws JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();

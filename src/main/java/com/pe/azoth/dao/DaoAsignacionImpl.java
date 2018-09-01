@@ -111,7 +111,7 @@ public class DaoAsignacionImpl implements DaoAsignacion {
 							+ "INNER JOIN productos p ON (p.codigo = a.codigo AND p.numero = a.numero ) "
 							+ "WHERE a.correo = ? AND p.codigo = ? AND p.numero = ?", 
 							new ArrayListHandler(),
-							correoUsuario,nroProducto,codigoProducto)
+							correoUsuario,codigoProducto,nroProducto)
 					.stream()
 					.map(rs -> new Asignacion(
 							(String)rs[0], //CORREO USUARIO
@@ -123,6 +123,28 @@ public class DaoAsignacionImpl implements DaoAsignacion {
 			
 			return (temp.size() == 1)?temp.get(0):null;
 		}
+	}
+	@Override
+	public Asignacion getAsignacion(Integer nroProducto, String codigoProducto, String correoUsuario,Connection connection) throws SQLException {
+		
+			List<Asignacion> temp =  new QueryRunner()
+					.query(connection,"SELECT a.correo, a.codigo, a.numero, p.id_estado "
+							+ "FROM asignaciones a "
+							+ "INNER JOIN productos p ON (p.codigo = a.codigo AND p.numero = a.numero ) "
+							+ "WHERE a.correo = ? AND p.codigo = ? AND p.numero = ?", 
+							new ArrayListHandler(),
+							correoUsuario,codigoProducto,nroProducto)
+					.stream()
+					.map(rs -> new Asignacion(
+							(String)rs[0], //CORREO USUARIO
+							(String)rs[1], //CODIGO PRODUCTO
+							(Integer)rs[2],//NUMERO PRODUCTO
+							(Integer)rs[3] //ESTADO DEL PRODUCTO
+							))
+					.collect(Collectors.toList());
+			
+			return (temp.size() == 1)?temp.get(0):null;
+		
 	}
 	
 	/* (non-Javadoc)
@@ -148,6 +170,25 @@ public class DaoAsignacionImpl implements DaoAsignacion {
 	public int insertAsignacion (Asignacion asignacion) throws SQLException, NamingException {
 		try(Connection connection = this.conexion.getConnection()){
 			return this.insertAsignacion(asignacion,connection);
+		}
+	}
+
+	@Override
+	public int deleteAsignacion(Asignacion asignacion, Connection connection) throws SQLException {
+		try(PreparedStatement pst = connection.prepareStatement("DELETE FROM asignaciones "
+				+ "WHERE correo = ? AND codigo = ? AND numero = ? ")){
+			pst.setString(1, asignacion.getCorreoUsuario());
+			pst.setString(2, asignacion.getCodProducto());
+			pst.setInt(3, asignacion.getNroProducto());
+			
+			return pst.executeUpdate();
+		}
+	}
+
+	@Override
+	public int deleteAsignacion(Asignacion asignacion) throws SQLException, NamingException {
+		try(Connection connection = this.conexion.getConnection()){
+			return this.deleteAsignacion(asignacion,connection);
 		}
 	}
 	

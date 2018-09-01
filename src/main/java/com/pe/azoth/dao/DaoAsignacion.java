@@ -26,6 +26,8 @@ public interface DaoAsignacion {
 	List<Asignacion> listAsignaciones(Integer nroProducto, String codigoProducto) throws SQLException, NamingException;
 
 	Asignacion getAsignacion(Integer nroProducto, String codigoProducto, String correoUsuario) throws SQLException, NamingException;
+	
+	Asignacion getAsignacion(Integer nroProducto, String codigoProducto, String correoUsuario, Connection connection) throws SQLException;
 
 	/* (non-Javadoc)
 	 * @see com.pe.azoth.dao.DaoAsignacion#insertAsignacion(com.pe.azoth.beans.Asignacion, java.sql.Connection)
@@ -37,6 +39,8 @@ public interface DaoAsignacion {
 	 */
 	int insertAsignacion(Asignacion asignacion) throws SQLException, NamingException;
 
+	int deleteAsignacion(Asignacion asignacion,Connection connection) throws SQLException;
 	
+	int deleteAsignacion(Asignacion asignacion) throws SQLException, NamingException;
 
 }

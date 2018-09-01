@@ -192,15 +192,17 @@ public class DaoProductoImpl implements DaoProducto {
 			pst.setString(2, producto.getDescripcion());
 			pst.setString(3, producto.getDireccion());
 			
-			pst.setString(3, producto.getOrigen());
-			pst.setString(4, producto.getDestino());
+			pst.setString(4, producto.getOrigen());
+			pst.setString(5, producto.getDestino());
 			
-			pst.setInt(5, producto.getEnvio().getId());
-			pst.setInt(6, producto.getRecepcion().getId());
-			pst.setInt(7, producto.getEstado().getId());
+			pst.setInt(6, producto.getEnvio().getId());
+			pst.setInt(7, producto.getRecepcion().getId());
+			pst.setInt(8, producto.getEstado().getId());
 			
-			pst.setString(8,producto.getCodigo());
+			pst.setString(9,producto.getCodigo());
 			
+			pst.executeUpdate();
+
 			return getNextIdProducto(producto.getCodigo(),connection)-1;
 		}
 	}
@@ -251,7 +253,7 @@ public class DaoProductoImpl implements DaoProducto {
 	@Override
 	public int getNextIdProducto(String codigo) throws SQLException, NamingException{
 		try(Connection connection = conexion.getConnection()){
-			try(PreparedStatement pst = connection.prepareStatement("select IFNULL(MAX(id_producto), 0) + 1  "
+			try(PreparedStatement pst = connection.prepareStatement("select IFNULL(MAX(numero), 0) + 1  "
 					+ "from courier_tracker.productos where codigo = ?")){
 				pst.setString(1, codigo);
 				
@@ -266,7 +268,7 @@ public class DaoProductoImpl implements DaoProducto {
 	}
 	
 	public int getNextIdProducto(String codigo, Connection connection) throws SQLException{
-		try(PreparedStatement pst = connection.prepareStatement("select IFNULL(MAX(id_producto), 0) + 1  "
+		try(PreparedStatement pst = connection.prepareStatement("select IFNULL(MAX(numero), 0) + 1  "
 				+ "from courier_tracker.productos where codigo = ?")){
 			pst.setString(1, codigo);
 			

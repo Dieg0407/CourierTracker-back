@@ -175,7 +175,9 @@ public class DaoClienteImpl implements DaoCliente {
 			
 			pst.executeUpdate();
 
-			return this.getCliente(cliente.getDni()).getId();
+			connection.commit();
+
+			return this.getCliente(cliente.getDni(),connection).getId();
 		}
 	}
 	
