@@ -9,7 +9,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
-import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
@@ -24,49 +23,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.pe.azoth.beans.Usuario;
 import com.pe.azoth.modelo.JWTManager;
 
-import com.pe.azoth.dao.Conexion;
-
-import com.pe.azoth.beans.DataBaseInfo;
-import java.sql.Connection;
-
 @Path("/")
 public class AuthenticationService {
 
-	//@Context private HttpServletResponse response;
-	@GET
-	@Path("/testConnection")
-	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	public Response probarConexion(){
-		try(Connection conn = new Conexion().getConnection()){
-			return Response.ok().entity("{\"message\":\"conexion establecida\"}").build();
-		}
-		catch(Exception e){
-			throw new WebApplicationException(
-						Response.status(Status.UNAUTHORIZED)
-						.entity("{\"message\":\""+e.getMessage()+"\"}")
-						.type(MediaType.APPLICATION_JSON)
-						.build()
-			);
-		}
-	}
-
-	@GET
-	@Path("/dbConfig")
-	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-	public DataBaseInfo getDatosConexion(){
-		try{
-			return new Conexion().getConfig();
-		}
-		catch(Exception e){
-			throw new WebApplicationException(
-						Response.status(Status.UNAUTHORIZED)
-						.entity("{\"message\":\""+e.getMessage()+"\"}")
-						.type(MediaType.APPLICATION_JSON)
-						.build()
-			);
-		}
-	}
-
+	
 	@POST
 	@Path("/getToken")
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
