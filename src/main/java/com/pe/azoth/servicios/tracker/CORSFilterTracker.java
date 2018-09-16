@@ -16,7 +16,7 @@ public class CORSFilterTracker implements ContainerResponseFilter {
 		
         response.getHeaders().add("Access-Control-Allow-Origin", "*");
         response.getHeaders().add("Access-Control-Allow-Headers",
-                "origin, content-type, accept, authorization, token");
+                "origin, content-type, accept, authorization, token, Inline");
         response.getHeaders().add("Access-Control-Allow-Credentials", "true");
         response.getHeaders().add("Access-Control-Allow-Methods",
                 "GET, POST, PUT, DELETE, OPTIONS, HEAD");
