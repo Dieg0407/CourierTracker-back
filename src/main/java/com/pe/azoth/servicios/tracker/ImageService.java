@@ -109,7 +109,7 @@ public class ImageService{
 					"Hubo un error en la configuración del servidor, Informar al proveedor");
 		}
 	}
-	/*
+
 	@POST
 	@Path("/putImage/{codigo}/{numero}")
 	@Consumes(MediaType.MULTIPART_FORM_DATA+";boundary=" + "*****")
@@ -166,7 +166,7 @@ public class ImageService{
 		}
 		
 	}
-	*/
+
 	@GET
 	@Path("/getNumberImages")
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
