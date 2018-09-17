@@ -106,10 +106,12 @@ public class ImageService{
 
 	@POST
 	@Path("/putImage/{codigo}/{numero}")
-	@Consumes({ "image/jpg", "image/png" })
+	@Consumes(MediaType.MULTIPART_FORM_DATA+"boundary=" + "*****")
 	public Response putImage(byte[] img, 
 		@PathParam("codigo") String codigo, 
 		@PathParam("numero") int numero ){
+		
+		System.err.println("ENTRO AL SERVICIO");
 		
 		Imagen imagen = new Imagen();
 		imagen.setCodigo(codigo);
