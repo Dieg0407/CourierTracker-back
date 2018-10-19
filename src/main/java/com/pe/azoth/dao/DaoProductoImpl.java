@@ -230,7 +230,7 @@ public class DaoProductoImpl implements DaoProducto {
 			pst.setInt(6, producto.getEnvio().getId());
 			pst.setInt(7, producto.getRecepcion().getId());
 			pst.setInt(8, producto.getEstado().getId());
-			pst.setLong(9, Instant.now().toEpochMilli());
+			pst.setLong(9, Instant.now().getEpochSecond());
 			pst.setLong(10, (producto.getEstado().getId() != 3 ? 0 : Instant.now().getEpochSecond()));
 			
 			pst.setString(11,producto.getCodigo());
