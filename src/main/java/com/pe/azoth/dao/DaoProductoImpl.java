@@ -181,9 +181,9 @@ public class DaoProductoImpl implements DaoProducto {
 			List<Producto> temp = new QueryRunner()
 					.query(connection,
 							"SELECT codigo,numero,descripcion,direccion,origen,destino,cliente_envio,"
-							+ "cliente_recepcion,id_estado, fec_creacion FROM productos "
+							+ "cliente_recepcion,id_estado, fec_creacion,fec_entrega FROM productos "
 							+ "WHERE id_estado != -1 AND codigo = ? AND numero = ? "
-							+ "ORDER BY id_estado,codigo,fec_creacion, fec_entrega ", 
+							+ "ORDER BY id_estado,codigo,fec_creacion ", 
 						new ArrayListHandler(),
 						codigo,numero)
 					.stream()
