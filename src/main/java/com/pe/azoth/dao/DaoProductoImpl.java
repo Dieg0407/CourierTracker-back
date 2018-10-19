@@ -259,7 +259,7 @@ public class DaoProductoImpl implements DaoProducto {
 		try(PreparedStatement pst = connection.prepareStatement(
 				"UPDATE productos "
 				+ "SET descripcion = ?,direccion = ?,origen = ?,destino = ?,cliente_envio = ?,"
-				+ "cliente_recepcion = ?,id_estado = ?,fec_entrega "
+				+ "cliente_recepcion = ?,id_estado = ?,fec_entrega = ? "
 				+ "WHERE codigo = ? AND numero = ?;")){
 			
 			pst.setString(1, producto.getDescripcion());
